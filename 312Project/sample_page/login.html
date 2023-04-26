@@ -18,13 +18,16 @@ label {
 <hr>
 <p>Log in to BottomHat</p>
 
-<form action="/user-login">
-  <label for="username">Username:</label>
-  <input type="text" id="username" name="fname"><br><br>
-  <label for="password">Password:</label>
-  <input type="password" id="password" name="lname"><br><br>
-  <input type="submit" value="Login">
+<form action="" method="post">
+  <input type="text" placeholder="Username" name="username" value="{{
+    request.form.username }}">
+   <input type="password" placeholder="Password" name="password" value="{{
+    request.form.password }}">
+  <input class="btn btn-default" type="submit" value="Login">
 </form>
+{% if error %}
+  <p class="error"><strong>Error:</strong> {{ error }}
+{% endif %}
 
 </body>
 </html>
