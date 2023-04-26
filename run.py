@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request
 import socketserver
 from pymongo import MongoClient
 
-
+app = Flask(__name__)
 
 mongo_client = MongoClient("mongo")
 db = mongo_client["cse312"]
@@ -31,5 +31,8 @@ def index():
         return redirect(url_for('home'))
     else:
         return redirect(url_for('login'))
+    
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8000, debug=True)
 
 #users_collection.insert_one({'username': , 'password': })
