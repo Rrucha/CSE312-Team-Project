@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>Gradebook</title>
+        <link rel="stylesheet" href="styles/gradebook.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+
+    <nav class="nav-bar">
+        <p>Course Name</p>
+        <a id="content" href="content.html">CONTENT</a>
+        <a id="gradebook" href="#">GRADEBOOK</a>
+        <a id="students" href="#">STUDENTS</a>
+    </nav>
+
+    <main>
+        <nav class="second-nav">
+            <input type="text" placeholder="Find a Student" name="search">
+            <button type="submit"><i class="fa fa-search"></i></button>
+            <label id="class-average">Class Average: 2/4</label>
+            <br>
+            <label id="based-on">Based on 4/4 <span>graded items</span></label>
+        </nav>
+        <p id="student-name">Student 1: <span id="student-grade"></span>90</p>
+        <p id="student-name">Student 2: <span id="student-grade"></span>80</p>
+    </main>

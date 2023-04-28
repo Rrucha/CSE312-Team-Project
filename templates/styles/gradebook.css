@@ -15,7 +15,7 @@
 
 #content{
     color: white;
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 20px;
     text-decoration-thickness: 3px;
     text-decoration-color: #3a7978;
@@ -34,8 +34,10 @@
     color: white;
     text-decoration: none;
     padding-right: 30px;
-    text-decoration-color: #3a7978;
+    text-decoration: underline;
+    text-underline-offset: 20px;
     text-decoration-thickness: 3px;
+    text-decoration-color: #3a7978;
 }
 
 #gradebook:hover{
@@ -60,96 +62,52 @@
 
 /********************************************** NAV BAR END **********************************************/
 main{
-    display: flex;
     font-family: sans-serif;
 }
-
-.nav-left{
-    background-color: #f9f9f9;
-    width: 400px;
-    height: 1000px;
-    border-right: solid #e7e9ec;
-}
-
-.nav-left-top{
-    height: 80px;
-    border-bottom: solid #e7e9ec;
-}
-#create-btn{
-    background-color: #2167d8;
-    color: white;
-    border: none;
-    width: 100px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    margin-top: 20px;
-    margin-left: 20px;
-    
-}
-
-button{
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-button:hover{
-    background-image: linear-gradient(rgb(0 0 0/40%) 0 0);
-    cursor: pointer;
-}
-
-#folder{
-    display: block;
-    font-size: large;
-    padding: 10px;
-}
-
-#folder:hover{
-    background-color: #2167d8;
-}
-
-#folder-content{
-    position: relative;
-}
-
-#folder-content label{
-    margin-left: 20px;
-    display: block;
-    margin-top: 10px;
-    background-color: transparent;
-    border: none;
-    padding: 10px;
-}
-
-#folder-content label:hover{
-    background-color: #e7e9ec;
-}
-
-.nav-right-top{
-    height: 80;
-    width: 1030px;
-    border-bottom: solid #e7e9ec;
-}
-.nav-right-top p, button{
-    display: inline-block;
+.second-nav{
     padding: 20px;
+    border-bottom: solid #e7e9ec;
+    height: 40px;
 }
-
-.nav-right-top button{
-    float: right;
-    width: auto;
-    height: 30px;
-    margin-top: 15px;
-    padding-top: 10px;
-    padding-bottom: 25px;
-    margin-right: 20px;
+/* Style the search field */
+main input[type=text] {
+    padding: 10px;
+    font-size: 17px;
+    float: left;
+    width: 200px;
     border: none;
-}
+    border-bottom: solid #e7e9ec;
+  }
 
-#present-slide-btn{
-    background-color: #2167d8;
-    color: white;
-}
+/* Style the submit button */
+main button {
+    float: left;
+    width: 50px;
+    padding: 10px;
+    background: transparent;
+    color: #203d61;
+    font-size: 17px;
+    border: none;
+    border-left: none; /* Prevent double borders */
+    cursor: pointer;
+  }
+  
+  main button:hover {
+    background: lightgray;
+  }
+  
+  #class-average{
+    margin-left: 350px;
+  }
+  #based-on{
+    margin-left: 340px;
+    font-size: small;
+  }
 
-#assign-btn{
+  #based-on span{
     color: #2167d8;
-    background-color: white;
-}
+  }
+
+  #student-name{
+    text-align: center;
+  }
