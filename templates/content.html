@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <title>Course</title>
+        <link rel="stylesheet" href="styles/content.css"/>
+    </head>
+
+    <nav class="nav-bar">
+        <p>Course Name</p>
+        <a id="content" href="#">CONTENT</a>
+        <a id="gradebook" href="#">GRADEBOOK</a>
+        <a id="students" href="#">STUDENTS</a>
+    </nav>
+
+    <main class="main">
+        <div class="nav-left">
+            <div class="nav-left-top">
+                <button id="create-btn">Create</button>
+            </div>
+            <label id="folder" for="folders-content" onclick="toggleOptions()">Week 1 Folder</label>
+            <div id="folder-content" name="Week 1 Folder" style="display: none;">
+                <label>Slide 1</label>
+                <label>Slide 2</label>
+                <label>Slide 3</label>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="nav-right-top">
+                <p id="folder-status">Private</p>
+                <button id="present-slide-btn">Present Slides</button>
+                <button id="assign-btn">Assign</button>
+            </div>
+            <label id="slide-content">Slide Content</label>
+        </div>
+
+        <div>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleOptions() {
+          var select = document.getElementById("folder-content");
+          if (select.style.display === "none") {
+            select.style.display = "block";
+          } else {
+            select.style.display = "none";
+          }
+        }
+        </script>
+</html>
