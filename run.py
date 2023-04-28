@@ -31,6 +31,10 @@ def index():
         return redirect(url_for('home'))
     else:
         return redirect(url_for('login'))
+
+@app.route('/create-join')
+def create_join():
+    return None
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8000, debug=True)
