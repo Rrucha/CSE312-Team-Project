@@ -1,9 +1,11 @@
 from flask import Flask, render_template, redirect, url_for, request, session
+from flask_socketio import SocketIO
 
 import socketserver
 from pymongo import MongoClient
 
 app = Flask(__name__)
+app_ws = SocketIO(app)
 
 mongo_client = MongoClient("mongo")
 db_siteData = mongo_client["site_data"]
@@ -51,11 +53,14 @@ def create_course():
     # insert new entry into course collection
     db_siteData_courses.insert_one(entry)
 
-    # create new database
+    # create new database using course name
     new_db = mongo_client[request.form['name']]
+
+    # redirect to new course homepage
+    return None
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app_ws.run(app, host='0.0.0.0', port=8000, debug=True, allow_unsafe_werkzeug=True)
 
 # users_collection.insert_one({'username': , 'password': })
