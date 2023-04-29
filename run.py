@@ -1,66 +1,223 @@
-from flask import Flask, render_template, redirect, url_for, request, session
-from flask_socketio import SocketIO
+from flask import Flask, render_template, redirect, url_for, request, session, make_response
+#from flask_socketio import SocketIO
 
 import socketserver
 from pymongo import MongoClient
 
 app = Flask(__name__)
-app_ws = SocketIO(app)
+#app_ws = SocketIO(app)
 
-mongo_client = MongoClient("mongo")
-db_siteData = mongo_client["site_data"]
-db_siteData_users = db_siteData["users"]
-db_siteData_courses = db_siteData["courses"]
+MONGO_HOST = "mongo"
+MONGO_PORT = 27017
+mongo_client = MongoClient(MONGO_HOST, MONGO_PORT)
+db  = mongo_client["TOPHAT_SITEDATA"]
+users_collection = db["users"]
+courses_collection = db["courses"]
+
+
+
+def enrolled_courses(user):
+    try:
+        enrolled_codes = users_collection.find({'user':user})[0]['enrolled']
+        enrolled = []
+        for i in enrolled_codes:
+            try:
+                enrolled += courses_collection.find({'code':i})
+            except:
+                pass
+    except:
+        enrolled = []
+    return enrolled
+
+def created_courses(user):
+    created = [i for i in courses_collection.find({'instructor':user})]
+    # print('created_courses', created)
+    return created
+
 
 socketserver.TCPServer.allow_reuse_address = True
-
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
     error = None
-    if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
-            error = 'Invalid Credentials. Please try again.'
+    if request.cookies.get("user"):
+        return redirect("/homepage")
+    if request.method == "POST":
+        # user = request.form["user"]
+        # user_type = request.form["user_type"]
+
+        user = request.form['user']
+        password = request.form['password']
+        login = False
+        # for row in users:
+        #     if user == row['user'] and password == row['password']:
+        #         login = True
+        #         break
+        try:
+            users_collection.find({'user':user})[0]['enrolled']
+        except:
+            users_collection.insert_one({
+                'user':user,
+                'password':password, 
+                'enrolled':[], 
+                'created':[]})
+        login = True  # temp allow all user to login
+        if request.form['user'] == 'admin' or password == 'admin':
+            res = redirect(url_for('homepage'))
+            res.set_cookie("user", user)
+        elif login:
+            res = redirect(url_for('homepage'))
+            res.set_cookie("user", user)
+        else: 
+            res = redirect(url_for('login'))
+            res.set_cookie("user", user)
+        # return redirect(url_for('home'))
+
+        # result = valid_login(user, request.form["password"])
+        if True:
+            return res
         else:
-            session['username'] = request.form['username']
-            return redirect(url_for('home'))
-    return render_template('login.html', error=error)
+            error = "Entered User or Password were incorrect!"
+    return render_template("login.html", error=error)
 
 
-@app.route('/home')
-def home():
-    return "Welcome to the home page!"
+@app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
+def create_course():
+    error = None
+    user = request.cookies.get("user")
+    if not user:
+        return redirect("/login")
+    if request.method == "POST":
+        code = request.form["code"]
+        code_match = [i for i in courses_collection.find({'code':code})]
+        print (code_match)
+        if code_match:
+            error = "code already exists"
+        else:
+            inserted_course = courses_collection.insert_one({
+                'title':request.form["title"],
+                'description':request.form["description"], 
+                'code':code, 
+                'instructor':user})
+            # if inserted_course.acknowledged:
+            #     return 
+
+            return redirect(f"/course/{code}")
+    return render_template("create_course.html", user=user, error=error)
+
+@app.route("/join_course", methods=["POST", "GET"])  # create a new auction by the seller
+def join_course():
+    error = None
+    user = request.cookies.get("user")
+    if not user:
+        return redirect("/login")
+    try:
+        code=request.args.get('code')
+    except:
+        code=None
+    if request.method == "POST" and not code:
+        code=request.form["code"]
+    code_match = [i for i in courses_collection.find({'code':code})]
+    # except:
+    #     code_match = False
+    
+    if code_match:
+        print(1111111111111, code_match, code, user)
+        enrolled_codes = users_collection.find({'user':user})[0]['enrolled']
+        if code not in enrolled_codes:
+            enrolled_codes.append(code)
+            users_collection.update_one({'user':user},{'$set':{'enrolled':enrolled_codes}})
+        return redirect(f"/course/{code}")
+    else:
+        error = "code does not exists"
+
+    return render_template("join_course.html", user=user, error=error)
+
+
+
+@app.route("/course/<code>", methods=["POST", "GET"])  # create a new auction by the seller
+def course(code):
+    error = None
+    user = request.cookies.get("user")
+    if not user:
+        return redirect("/login")
+    # code = request.form["code"]
+    code_match = [i for i in courses_collection.find({'code':code})]
+    print("CCCC", code_match)
+    if code_match:
+        course = code_match[0]
+
+        return render_template("course.html", user=user, error=error,course=course)
+
+    # else:
+    #     inserted_course = courses_collection.insert_one({
+    #         'title':request.form["title"],
+    #         'description':request.form["description"], 
+    #         'code':code, 
+    #         'instructor':user})
+    #     # if inserted_course.acknowledged:
+    #     #     return 
+
+        # return redirect(f"/course/{code}")
+    return render_template(
+        "homepage.html", user=user, error=error
+    )
+
+@app.route("/course_detail", methods=["GET"])  # create a new auction by the seller
+def course_detail():
+    return render_template(
+        "content.html"
+    )
+    
+@app.route('/courseslist')
+def courseslist():
+    error = ""
+    user = request.cookies.get("user")
+    if not user:
+        return redirect("/login")
+    return render_template("courses.html", user=user, enrolled=enrolled_courses(user), created_courses=created_courses(user))
+
+@app.route('/homepage')
+def homepage():
+    error = None
+    user = request.cookies.get("user")
+    if not user:
+        return redirect("/login")
+    return render_template(
+        "homepage.html", user=user, courses=[i for i in courses_collection.find()]
+    )
+
+
+@app.route("/register", methods=["POST", "GET"])  # register system to login
+def register():
+    error = None
+    if request.cookies.get("user"):
+        return redirect("/homepage")
+    if request.method == "POST":
+        user = request.form["user"]
+        if "@" in user and "." in user:
+            if found:
+                error = "User already registered"
+            else:
+                created_user
+                connection.commit()
+                connection.close()
+                return redirect("/login")
+        else:
+            error = "User not valid"
+    return render_template("register.html", error=error)
+
+
+@app.route("/logout", methods=["POST", "GET"])  # logout by deleting the cookie
+def logout():
+    error = None
+    res = make_response(render_template("login.html", error=error))
+    res.set_cookie("user", "", expires=0)
+    return res
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if 'username' in session:
-        username = session['username']
-        return redirect(url_for('home'))
-    else:
-        return redirect(url_for('login'))
-
-
-@app.route('/create-join')
-def create_join():
-    return render_template('create_join.html')
-
-
-@app.route('/create-course', methods=['POST'])
-def create_course():
-    entry = {"name": request.form['name'], "instructor": session['username']}
-
-    # insert new entry into course collection
-    db_siteData_courses.insert_one(entry)
-
-    # create new database using course name
-    new_db = mongo_client[request.form['name']]
-
-    # redirect to new course homepage
-    return None
-
+    return redirect('/login')
 
 if __name__ == "__main__":
-    app_ws.run(app, host='0.0.0.0', port=8000, debug=True, allow_unsafe_werkzeug=True)
-
-# users_collection.insert_one({'username': , 'password': })
+    app.run(host='0.0.0.0', port=8000, debug=True)
