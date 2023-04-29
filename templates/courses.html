@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block main %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Courses</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                <li class="breadcrumb-item active">Courses</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section dashboard">
+        <div class="row">
+            <!-- Left side columns -->
+            <div class="col-lg-8">
+                <div class="row">
+
+ 
+                    <!-- Courses List -->
+                    <div class="col-12">
+                        <div class="card recent-sales overflow-auto">
+                            <div class="card-body">
+
+                                <a href="/join_course" style="position: absolute;right: 40px;top: 22px;background: white;"><i class="bi bi-plus-circle"> Join Course</i></a>
+                                {% if enrolled %}
+                                <h5 class="card-title">Enrolled courses<span> | Courses that you enrolled</span></h5>
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Code</th>
+                                            <th scope="col">Courses Title</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Instructor</th>
+                                            <th scope="col">View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for course in enrolled %}
+                                        <tr>
+                                            <td>{{course['code']}}</td>
+                                            <td><a href="/course/{{course['code']}}"><b>{{course['title']}}</b></a></td>
+                                            <td>{{course['description'][:30]}}</td>
+                                            <td>{{course['instructor']}}</td>
+                                            
+                                            <td><a href="/course_detail" class="text-primary">View</a></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <h5 class="card-title">No Enrolled Course Found <span>| Enroll to a courses</span></h5>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div><!-- Courses List -->
+
+                    <!-- Created Courses List -->
+                    <div class="col-12">
+                        <div class="card recent-sales overflow-auto">
+                            <div class="card-body">
+                                <a href="/create_course" style="position: absolute;right: 40px;top: 22px;background: white;"><i class="bi bi-journal-plus"> Create Course</i></a>
+                                {% if created_courses %}
+                                <h5 class="card-title">Created Courses List <span>| Courses that you created</span></h5>
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Code</th>
+                                            <th scope="col">Courses Title</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Instructor</th>
+                                            <th scope="col">View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for course in created_courses %}
+                                        <tr>
+                                            <td>{{course['code']}}</td>
+                                            <td><a href="/course/{{course['code']}}"><b>{{course['title']}}</b></a></td>
+                                            <td>{{course['description'][:30]}}</td>
+                                            <td>{{course['instructor']}}</td>
+                                            <td><a href="/course_detail" class="text-primary">View</a></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <h5 class="card-title">Created Courses Not Found<span>| You didn't create any course yet</span></h5>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Created Courses List -->
+                </div>
+            </div><!-- End Left side columns -->
+        </div>
+    </section>
+</main><!-- End #main -->
+{% endblock %}

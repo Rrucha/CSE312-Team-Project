@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% block main %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Profile</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item">Pages</li>
+                <li class="breadcrumb-item active">Profile</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section profile">
+        <div class="row">
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+                        <img src="/static/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+                        <h2>{{user}}</h2>
+                        <h3>{{type}}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-body pt-3">
+                        <!-- Bordered Tabs -->
+                        <ul class="nav nav-tabs nav-tabs-bordered">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-cc">Credit Card</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Settings</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-2">
+                            <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                                <h5 class="card-title">About</h5>
+                                {% if type == "bidder" %}
+                                <p class="small fst-italic">Hello, I am {{profile[1]}} {{profile[2]}} from {{address[2]}} {{address[3]}}, {{zipcode[1]}} {{zipcode[2]}} <br>Reach me out at {{user}}</p>
+                                {% elif type == "seller" %}
+                                <p class="small fst-italic">Hello,<br>Reach me out at {{user}}</p>
+                                {% endif %}
+                                <h5 class="card-title">Profile Details</h5>
+                                {% if type == "bidder" %}
+                                <!-- bidder -->
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label ">Full Name</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[1]}} {{profile[2]}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Gender</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[3]}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Age</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[4]}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Major</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[6]}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">User</div>
+                                    <div class="col-lg-9 col-md-8">{{user}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Address</div>
+                                    <div class="col-lg-9 col-md-8">{{address[2]}} {{address[3]}}<br>{{zipcode[1]}} {{zipcode[2]}}</div>
+                                </div>
+                                {% elif type == "seller" %}
+                                <!-- Seller -->
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">User</div>
+                                    <div class="col-lg-9 col-md-8">{{user}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Bank Routing Number</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[1]}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Bank Account Number</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[2]}}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label">Balance</div>
+                                    <div class="col-lg-9 col-md-8">{{profile[3]}}</div>
+                                </div>
+                                {% elif type == "helpdesk" %}
+                                {% endif %}
+                                <br>
+                                <h5 class="card-title">Credit Cards</h5>
+                                <div class="row">
+                                    {% for last_four_digit in last_four_digits %}
+                                    <div class="col-lg-9 col-md-8">XXXX-XXXX-XXXX-{{last_four_digit}}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+                                <!-- Profile Edit Form -->
+                                <form>
+                                    <div class="row mb-3">
+                                        <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Profile Image</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <img src="/static/img/profile-img.jpg" alt="Profile">
+                                            <div class="pt-2">
+                                                <a href="#" class="btn btn-primary btn-sm" title="Upload new profile image"><i class="bi bi-upload"></i></a>
+                                                <a href="#" class="btn btn-danger btn-sm" title="Remove my profile image"><i class="bi bi-trash"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if type=="seller" %}
+                                    <div class="row mb-3">
+                                        <label for="bank_routing_number" class="col-md-4 col-lg-3 col-form-label">Bank Routing Number</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="bank_routing_number" type="text" class="form-control" id="bank_routing_number" value="">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="bank_account_number" class="col-md-4 col-lg-3 col-form-label">Bank Account Number</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="bank_account_number" type="text" class="form-control" id="bank_account_number" value="">
+                                        </div>
+                                    </div>
+                                    {% elif type=="bidder" %}
+                                    <div class="row mb-3">
+                                        <label for="firstName" class="col-md-4 col-lg-3 col-form-label">First Name</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="firstName" type="text" class="form-control" id="firstName" value="">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="lastName" class="col-md-4 col-lg-3 col-form-label">Last Name</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="lastName" type="text" class="form-control" id="lastName" value="">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="about" class="col-md-4 col-lg-3 col-form-label">About</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <textarea name="about" class="form-control" id="about" style="height: 100px"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="age" class="col-md-4 col-lg-3 col-form-label">Age</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="age" type="text" class="form-control" id="age" value="">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="gender" class="col-md-4 col-lg-3 col-form-label">Gender</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="gender" type="text" class="form-control" id="gender" value="">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="major" class="col-md-4 col-lg-3 col-form-label">Major</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="major" type="text" class="form-control" id="major" value="">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="Address" class="col-md-4 col-lg-3 col-form-label">Address</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="address" type="text" class="form-control" id="Address" value="">
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form><!-- End Profile Edit Form -->
+                            </div>
+                            <div class="tab-pane fade pt-3" id="profile-cc">
+                                <h4 class="card-title">Saved Credit Cards</h4>
+                                {% for last_four_digit in last_four_digits %}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 label ">XXXX-XXXX-XXXX-{{last_four_digit}}</div>
+                                    <div class="col-lg-3 col-md-4 label "><a href="#"><i class="bi bi-trash3">Delete</i></a></div>
+                                </div>
+                                {% endfor %}
+                                <br>
+                                <h4 class="card-title">Add New Credit Card</h4>
+                                <!-- Credit card Form -->
+                                <form class="row g-3" method="POST" action="/save_credit_card">
+                                    <div class="col-md-6">
+                                        <label for="credit_card_num" class="form-label">Credit Card Num</label>
+                                        <input type="text" class="form-control" id="credit_card_num" name="credit_card_num" maxlength="19" size="19" placeholder="XXXX-XXXX-XXXX-XXXX">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="card_type" class="form-label">Card Type</label>
+                                        <input type="text" class="form-control" id="card_type" name="card_type" placeholder="Master">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="expire_month" class="form-label">Expire Month</label>
+                                        <input type="text" class="form-control" id="expire_month" name="expire_month" maxlength="2" size="2" placeholder="MM">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="expire_year" class="form-label">Expire Year</label>
+                                        <input type="text" class="form-control" id="expire_year" name="expire_year" maxlength="2" size="2" placeholder="YY">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="security_code" class="form-label">Security Code</label>
+                                        <input type="password" class="form-control" id="security_code" name="security_code" placeholder="pin">
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">Save</button>
+                                        <button type="reset" class="btn btn-secondary">Reset</button>
+                                    </div>
+                                </form><!-- End Credit card Form -->
+                            </div>
+                            <div class="tab-pane fade pt-3" id="profile-settings">
+                                <!-- Settings Form -->
+                                <form>
+                                    <div class="row mb-3">
+                                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">User Notifications</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input" checked="" type="checkbox" id="proOffers">
+                                                <label class="form-check-label" for="proOffers">
+                                                    Marketing and promo offers
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form><!-- End settings Form -->
+                            </div>
+                            <div class="tab-pane fade pt-3" id="profile-change-password">
+                                <!-- Change Password Form -->
+                                <form>
+                                    <div class="row mb-3">
+                                        <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Current Password</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="password" type="password" class="form-control" id="currentPassword">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">New Password</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="newpassword" type="password" class="form-control" id="newPassword">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input name="renewpassword" type="password" class="form-control" id="renewPassword">
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">Change Password</button>
+                                    </div>
+                                </form><!-- End Change Password Form -->
+                            </div>
+                        </div><!-- End Bordered Tabs -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main><!-- End #main -->
+{% endblock %}
