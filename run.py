@@ -61,7 +61,7 @@ def login():
                 'enrolled':[], 
                 'created':[]})
         login = True  # temp allow all user to login
-        if request.form['user'] == 'admin' or password == 'admin':
+        if request.form['user'] == '' or password == '':
             res = redirect(url_for('homepage'))
             res.set_cookie("user", user)
         elif login:
