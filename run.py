@@ -142,9 +142,10 @@ def course(code):
         return redirect("/login")
     # code = request.form["code"]
     code_match = [i for i in courses_collection.find({'code':code})]
-    print("CCCC", code_match)
     if code_match:
         course = code_match[0]
+        if course in enrolled_courses(user) or course in created_courses(user):
+            return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error, course=course)
 
         return render_template("course.html", user=user, error=error,course=course)
 
@@ -160,12 +161,6 @@ def course(code):
         # return redirect(f"/course/{code}")
     return render_template(
         "homepage.html", user=user, error=error
-    )
-
-@app.route("/course_detail", methods=["GET"])  # create a new auction by the seller
-def course_detail():
-    return render_template(
-        "content.html"
     )
     
 @app.route('/courseslist')
