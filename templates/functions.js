@@ -1,9 +1,18 @@
+import { io } from "socket.io-client";
+
 
 // Jesse's code
 
-function welcome() {
-	document.getElementById("paragraph").innerHTML += "<br/>This text was added by JavaScript 😀"
-}
+const socket = io("ws://localhost:8080")
+
+
+socket.on("STU_new_question", (post_course, json) => {
+    // TODO
+})
+
+socket.on("STU_stop_question", (post_course) => {
+
+})
 
 // Establish a WebSocket connection with the server
 const socket = new WebSocket('ws://' + window.location.host + '/websocket');
