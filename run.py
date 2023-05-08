@@ -1,11 +1,13 @@
+from ast import Pass
 import json
+from urllib.parse import uses_query
 
 from flask import Flask, render_template, redirect, url_for, request, session, make_response, Response, \
     send_from_directory
 from flask_socketio import SocketIO, emit
-
 import socketserver
 from pymongo import MongoClient
+import bcrypt
 
 app = Flask(__name__)
 app_ws = SocketIO(app)
@@ -43,6 +45,7 @@ socketserver.TCPServer.allow_reuse_address = True
 
 @app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
+
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
@@ -57,31 +60,47 @@ def login():
         #     if user == row['user'] and password == row['password']:
         #         login = True
         #         break
-        try:
-            users_collection.find({'user': user})[0]['enrolled']
-        except:
-            users_collection.insert_one({
-                'user': user,
-                'password': password,
-                'enrolled': [],
-                'created': []})
-        login = True  # temp allow all user to login
-        if request.form['user'] == '' or password == '':
-            res = redirect(url_for('homepage'))
-            res.set_cookie("user", user)
-        elif login:
-            res = redirect(url_for('homepage'))
-            res.set_cookie("user", user)
-        else:
-            res = redirect(url_for('login'))
-            res.set_cookie("user", user)
+        # try:
+        #     users_collection.find({'user': user})[0]['enrolled']
+        # except:
+        #     users_collection.insert_one({
+        #         'user': user,
+        #         'password': password,
+        #         'enrolled': [],
+        #         'created': []})
+        # login = True  # temp allow all user to login
+        # if request.form['user'] == '' or password == '':
+        #     res = redirect(url_for('homepage'))
+        #     res.set_cookie("user", user)
+        # elif login:
+        #     res = redirect(url_for('homepage'))
+        #     res.set_cookie("user", user)
+        # else:
+        #     res = redirect(url_for('login'))
+        #     res.set_cookie("user", user)
+
+
+        username = request.form['user']
+        password = request.form['password']
+        print("user", username)
+        print("pass", password)
+        login_name = users_collection.find_one({"username":username})
+        if login_name != None:
+            kkk = login_name["password"]
+            checking_password = bcrypt.checkpw(password.encode(),kkk)
+            if checking_password:
+                return render_template("homepage.html")
+            else:
+                msg = ' The usrname/password is incorrect. '
+                return render_template("login.html", msg=msg)
+
         # return redirect(url_for('home'))
 
         # result = valid_login(user, request.form["password"])
-        if True:
-            return res
-        else:
-            error = "Entered User or Password were incorrect!"
+        # if True:
+        #     return res
+        # else:
+        #     error = "Entered User or Password were incorrect!"
     return render_template("login.html", error=error, )
 
 
@@ -92,6 +111,7 @@ def functions_js():
 
 @app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
 def create_course():
+    print("create_course")
     error = None
     user = request.cookies.get("user")
     if not user:
@@ -199,26 +219,31 @@ def homepage():
 @app.route("/register", methods=["POST", "GET"])  # register system to login
 def register():
     print("text")
+
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
     if request.method == "POST":
         user = request.form["user"]
-        if "@" in user and "." in user:
-            if found:
-                error = "User already registered"
-            else:
-                created_user
-                connection.commit()
-                connection.close()
-                return redirect("/login")
-        else:
-            error = "User not valid"
-    return render_template("register.html", error=error)
+        username = request.form['user']
+        password = request.form['password']
+        print("user", username)
+        print("pass", password)
+
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode(), salt)
+        users_collection.insert_one({"username": username, "password": hashed_password})
+
+        msg = 'You have successfully registered !'
+
+        return render_template("login.html", msg=msg)
+    else:
+        return render_template("register.html", error=error)
 
 
 @app.route("/logout", methods=["POST", "GET"])  # logout by deleting the cookie
 def logout():
+    print("logout")
     error = None
     res = make_response(render_template("login.html", error=error))
     res.set_cookie("user", "", expires=0)

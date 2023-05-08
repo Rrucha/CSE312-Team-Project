@@ -2,3 +2,4 @@ pymongo
 Flask
 Flask_SocketIO
 gevent-websocket
+bcrypt
