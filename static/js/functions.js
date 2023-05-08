@@ -1,6 +1,6 @@
-import { io } from "socket.io-client";
+import { io } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
 
-const socket = io("ws://localhost:8080")
+const socket = io("http://localhost:8080/")
 
 socket.on("STU_new_question", (post_course, json) => {
     // TODO

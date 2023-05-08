@@ -1,6 +1,7 @@
 import json
 
-from flask import Flask, render_template, redirect, url_for, request, session, make_response
+from flask import Flask, render_template, redirect, url_for, request, session, make_response, Response, \
+    send_from_directory
 from flask_socketio import SocketIO, emit
 
 import socketserver
@@ -86,7 +87,7 @@ def login():
 
 @app.route("/functions.js")
 def functions_js():
-    return url_for('static', filename='js/functions.js')
+    return send_from_directory('static', 'js/functions.js')
 
 
 @app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
@@ -261,4 +262,4 @@ def HTTP_post_question():
 
 
 if __name__ == "__main__":
-    app_ws.run(app, host='0.0.0.0', port=8000, debug=True, allow_unsafe_werkzeug=True)
+    app_ws.run(app, host='0.0.0.0', port=8000)
