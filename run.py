@@ -81,7 +81,12 @@ def login():
             return res
         else:
             error = "Entered User or Password were incorrect!"
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, )
+
+
+@app.route("/functions.js")
+def functions_js():
+    return url_for('static', filename='js/functions.js')
 
 
 @app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
@@ -139,7 +144,7 @@ def join_course():
 
 
 @app.route("/course/<code>", methods=["POST", "GET"])  # create a new auction by the seller
-def course(code):
+def enter_course(code):
     error = None
     user = request.cookies.get("user")
     if not user:
@@ -192,6 +197,7 @@ def homepage():
 
 @app.route("/register", methods=["POST", "GET"])  # register system to login
 def register():
+    print("text")
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
@@ -255,4 +261,4 @@ def HTTP_post_question():
 
 
 if __name__ == "__main__":
-    app_ws.run(app, host='0.0.0.0', port=8000, debug=True)
+    app_ws.run(app, host='0.0.0.0', port=8000, debug=True, allow_unsafe_werkzeug=True)
