@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, session, make_response
 from flask_socketio import SocketIO, emit
-
+import json
 import socketserver
 from pymongo import MongoClient
 
@@ -14,6 +14,7 @@ db = mongo_client["TOPHAT_SITEDATA"]
 users_collection = db["users"]
 courses_collection = db["courses"]
 
+print("Hello123")
 
 def enrolled_courses(user):
     try:
@@ -37,9 +38,12 @@ def created_courses(user):
 
 socketserver.TCPServer.allow_reuse_address = True
 
-
+print("before running login")
 @app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
+    print("")
+    print("This is login")
+    print("")
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
@@ -81,6 +85,7 @@ def login():
             error = "Entered User or Password were incorrect!"
     return render_template("login.html", error=error)
 
+print("after running login")
 
 @app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
 def create_course():
@@ -186,23 +191,53 @@ def homepage():
     )
 
 
+# @app.route('/register', methods=['POST', 'GET'])
+# def register():
+#     print("got to register")
+#     if request.method == 'POST':
+#         username = request.form.get('user')
+#         password = request.form.get('password')
+#
+#         # Process the username and password as needed
+#
+#         # Example: Print the username and password
+#         print("Username:", username)
+#         print("Password:", password)
+#
+#         # Redirect or return a response as needed
+#         return render_template("login.html")
+#     else:
+#         # Handle the 'GET' request differently, if needed
+#         return render_template("register.html")
+
+
 @app.route("/register", methods=["POST", "GET"])  # register system to login
 def register():
+    print("register123")
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
     if request.method == "POST":
+        print("user " , request.form['user'])
+        print("Login ", request.form['password'])
+        username = request.form[]
+
+
+        print("running register post")
         user = request.form["user"]
-        if "@" in user and "." in user:
-            if found:
-                error = "User already registered"
-            else:
-                created_user
-                connection.commit()
-                connection.close()
-                return redirect("/login")
-        else:
-            error = "User not valid"
+
+        users_collection.insert_one({"username": })
+        print("User: ",user)
+        # if "@" in user and "." in user:
+        #     if found:
+        #         error = "User already registered"
+        #     else:
+        #         created_user
+        #         connection.commit()
+        #         connection.close()
+        #         return redirect("/login")
+        # else:
+        #     error = "User not valid"
     return render_template("register.html", error=error)
 
 
@@ -240,4 +275,4 @@ def HTTP_post_question():
 
 
 if __name__ == "__main__":
-    app_ws.run(app, host='0.0.0.0', port=8000, debug=True)
+    app_ws.run(app, host='0.0.0.0', port=8000, debug=False, allow_unsafe_werkzeug=True)
