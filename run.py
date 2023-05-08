@@ -1,8 +1,8 @@
+from ast import Pass
 import json
 
 from flask import Flask, render_template, redirect, url_for, request, session, make_response
 from flask_socketio import SocketIO, emit
-
 import socketserver
 from pymongo import MongoClient
 
@@ -42,6 +42,7 @@ socketserver.TCPServer.allow_reuse_address = True
 
 @app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
+  
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
@@ -86,11 +87,13 @@ def login():
 
 @app.route("/functions.js")
 def functions_js():
+    print("functionjs")
     return url_for('static', filename='js/functions.js')
 
 
 @app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
 def create_course():
+    print("create_course")
     error = None
     user = request.cookies.get("user")
     if not user:
@@ -198,26 +201,37 @@ def homepage():
 @app.route("/register", methods=["POST", "GET"])  # register system to login
 def register():
     print("text")
+   
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
     if request.method == "POST":
         user = request.form["user"]
-        if "@" in user and "." in user:
-            if found:
-                error = "User already registered"
-            else:
-                created_user
-                connection.commit()
-                connection.close()
-                return redirect("/login")
-        else:
-            error = "User not valid"
-    return render_template("register.html", error=error)
+        username = request.form['user']
+        password = request.form['password']
+        print("user", username)
+        print("pass", password)
+        
+        return redirect("/login")
+        
+        # if "@" in user and "." in user:
+        #     if found:
+        #         error = "User already registered"
+        #     else:
+        #         created_user
+        #         connection.commit()
+        #         connection.close()
+        #         return redirect("/login")
+        # else:
+        #     error = "User not valid"
+    
+    else:
+        return render_template("register.html", error=error)
 
 
 @app.route("/logout", methods=["POST", "GET"])  # logout by deleting the cookie
 def logout():
+    print("logout")
     error = None
     res = make_response(render_template("login.html", error=error))
     res.set_cookie("user", "", expires=0)
