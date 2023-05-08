@@ -5,6 +5,7 @@ from flask import Flask, render_template, redirect, url_for, request, session, m
 from flask_socketio import SocketIO, emit
 import socketserver
 from pymongo import MongoClient
+import bcrypt
 
 app = Flask(__name__)
 app_ws = SocketIO(app)
@@ -211,20 +212,14 @@ def register():
         password = request.form['password']
         print("user", username)
         print("pass", password)
+
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode(), salt)
+        users_collection.insert_one({"username": username, "password": hashed_password})
         
-        return redirect("/login")
-        
-        # if "@" in user and "." in user:
-        #     if found:
-        #         error = "User already registered"
-        #     else:
-        #         created_user
-        #         connection.commit()
-        #         connection.close()
-        #         return redirect("/login")
-        # else:
-        #     error = "User not valid"
-    
+        msg = 'You have successfully registered !'
+
+        return render_template("login.html", msg=msg)
     else:
         return render_template("register.html", error=error)
 

@@ -1,3 +1,4 @@
 pymongo
 Flask
 Flask_SocketIO
+bcrypt
