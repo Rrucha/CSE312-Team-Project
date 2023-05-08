@@ -1,5 +1,6 @@
 from ast import Pass
 import json
+from urllib.parse import uses_query
 
 from flask import Flask, render_template, redirect, url_for, request, session, make_response
 from flask_socketio import SocketIO, emit
@@ -58,31 +59,47 @@ def login():
         #     if user == row['user'] and password == row['password']:
         #         login = True
         #         break
-        try:
-            users_collection.find({'user': user})[0]['enrolled']
-        except:
-            users_collection.insert_one({
-                'user': user,
-                'password': password,
-                'enrolled': [],
-                'created': []})
-        login = True  # temp allow all user to login
-        if request.form['user'] == '' or password == '':
-            res = redirect(url_for('homepage'))
-            res.set_cookie("user", user)
-        elif login:
-            res = redirect(url_for('homepage'))
-            res.set_cookie("user", user)
-        else:
-            res = redirect(url_for('login'))
-            res.set_cookie("user", user)
+        # try:
+        #     users_collection.find({'user': user})[0]['enrolled']
+        # except:
+        #     users_collection.insert_one({
+        #         'user': user,
+        #         'password': password,
+        #         'enrolled': [],
+        #         'created': []})
+        # login = True  # temp allow all user to login
+        # if request.form['user'] == '' or password == '':
+        #     res = redirect(url_for('homepage'))
+        #     res.set_cookie("user", user)
+        # elif login:
+        #     res = redirect(url_for('homepage'))
+        #     res.set_cookie("user", user)
+        # else:
+        #     res = redirect(url_for('login'))
+        #     res.set_cookie("user", user)
+        
+        
+        username = request.form['user']
+        password = request.form['password']
+        print("user", username)
+        print("pass", password)
+        login_name = users_collection.find_one({"username":username})
+        if login_name != None:
+            kkk = login_name["password"]
+            checking_password = bcrypt.checkpw(password.encode(),kkk)
+            if checking_password:
+                return render_template("homepage.html")
+            else:
+                msg = ' The usrname/password is incorrect. '
+                return render_template("login.html", msg=msg)
+                
         # return redirect(url_for('home'))
 
         # result = valid_login(user, request.form["password"])
-        if True:
-            return res
-        else:
-            error = "Entered User or Password were incorrect!"
+        # if True:
+        #     return res
+        # else:
+        #     error = "Entered User or Password were incorrect!"
     return render_template("login.html", error=error, )
 
 
