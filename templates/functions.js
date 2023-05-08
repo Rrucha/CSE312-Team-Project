@@ -9,4 +9,3 @@ socket.on("STU_new_question", (post_course, json) => {
 socket.on("STU_stop_question", (post_course) => {
 
 })
-

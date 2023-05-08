@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, render_template, redirect, url_for, request, session, make_response
 from flask_socketio import SocketIO, emit
 
@@ -143,11 +145,12 @@ def course(code):
     if not user:
         return redirect("/login")
     # code = request.form["code"]
-    code_match = [i for i in courses_collection.find({'code':code})]
+    code_match = [i for i in courses_collection.find({'code': code})]
     if code_match:
         course = code_match[0]
         if course in enrolled_courses(user) or course in created_courses(user):
-            return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error, course=course)
+            return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error,
+                                   course=course)
 
         return render_template("course.html", user=user, error=error, course=course)
 
@@ -164,6 +167,7 @@ def course(code):
     return render_template(
         "homepage.html", user=user, error=error
     )
+
 
 @app.route('/courseslist')
 def courseslist():
@@ -231,12 +235,23 @@ def stop_question(post_course):
 
 
 # Instructors should have access to a question form which sends an HTTP multipart request
-@app.route('/post-question')
+@app.route('/post-question', methods=['POST'])
 def HTTP_post_question():
-    course = request.form["course"]
-    question = request.form["question"]
-    # TODO
+    course_dict = {
+        "course": request.form['course'],
+        "question": request.form['question'],
+        "answers": [
+            request.form['a1'],
+            request.form['a2'],
+            request.form['a3'],
+            request.form['a4']
+        ],
+        "correct": request.form['correct']  # character a, b, c, or d
+    }
 
+    # TODO
+    json_str = json.dumps(course_dict)
+    app_ws.emit('STU_new_question', json_str, broadcast=True)
 
 
 if __name__ == "__main__":
