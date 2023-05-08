@@ -1,6 +1,8 @@
+from ast import Pass
+import json
+
 from flask import Flask, render_template, redirect, url_for, request, session, make_response
 from flask_socketio import SocketIO, emit
-import json
 import socketserver
 from pymongo import MongoClient
 
@@ -14,7 +16,6 @@ db = mongo_client["TOPHAT_SITEDATA"]
 users_collection = db["users"]
 courses_collection = db["courses"]
 
-print("Hello123")
 
 def enrolled_courses(user):
     try:
@@ -38,12 +39,10 @@ def created_courses(user):
 
 socketserver.TCPServer.allow_reuse_address = True
 
-print("before running login")
+
 @app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
-    print("")
-    print("This is login")
-    print("")
+  
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
@@ -83,12 +82,18 @@ def login():
             return res
         else:
             error = "Entered User or Password were incorrect!"
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, )
 
-print("after running login")
+
+@app.route("/functions.js")
+def functions_js():
+    print("functionjs")
+    return url_for('static', filename='js/functions.js')
+
 
 @app.route("/create_course", methods=["POST", "GET"])  # create a new auction by the seller
 def create_course():
+    print("create_course")
     error = None
     user = request.cookies.get("user")
     if not user:
@@ -142,17 +147,18 @@ def join_course():
 
 
 @app.route("/course/<code>", methods=["POST", "GET"])  # create a new auction by the seller
-def course(code):
+def enter_course(code):
     error = None
     user = request.cookies.get("user")
     if not user:
         return redirect("/login")
     # code = request.form["code"]
-    code_match = [i for i in courses_collection.find({'code':code})]
+    code_match = [i for i in courses_collection.find({'code': code})]
     if code_match:
         course = code_match[0]
         if course in enrolled_courses(user) or course in created_courses(user):
-            return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error, course=course)
+            return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error,
+                                   course=course)
 
         return render_template("course.html", user=user, error=error, course=course)
 
@@ -169,6 +175,7 @@ def course(code):
     return render_template(
         "homepage.html", user=user, error=error
     )
+
 
 @app.route('/courseslist')
 def courseslist():
@@ -191,43 +198,22 @@ def homepage():
     )
 
 
-# @app.route('/register', methods=['POST', 'GET'])
-# def register():
-#     print("got to register")
-#     if request.method == 'POST':
-#         username = request.form.get('user')
-#         password = request.form.get('password')
-#
-#         # Process the username and password as needed
-#
-#         # Example: Print the username and password
-#         print("Username:", username)
-#         print("Password:", password)
-#
-#         # Redirect or return a response as needed
-#         return render_template("login.html")
-#     else:
-#         # Handle the 'GET' request differently, if needed
-#         return render_template("register.html")
-
-
 @app.route("/register", methods=["POST", "GET"])  # register system to login
 def register():
-    print("register123")
+    print("text")
+   
     error = None
     if request.cookies.get("user"):
         return redirect("/homepage")
     if request.method == "POST":
-        print("user " , request.form['user'])
-        print("Login ", request.form['password'])
-        username = request.form[]
-
-
-        print("running register post")
         user = request.form["user"]
-
-        users_collection.insert_one({"username": })
-        print("User: ",user)
+        username = request.form['user']
+        password = request.form['password']
+        print("user", username)
+        print("pass", password)
+        
+        return redirect("/login")
+        
         # if "@" in user and "." in user:
         #     if found:
         #         error = "User already registered"
@@ -238,11 +224,14 @@ def register():
         #         return redirect("/login")
         # else:
         #     error = "User not valid"
-    return render_template("register.html", error=error)
+    
+    else:
+        return render_template("register.html", error=error)
 
 
 @app.route("/logout", methods=["POST", "GET"])  # logout by deleting the cookie
 def logout():
+    print("logout")
     error = None
     res = make_response(render_template("login.html", error=error))
     res.set_cookie("user", "", expires=0)
@@ -266,13 +255,24 @@ def stop_question(post_course):
 
 
 # Instructors should have access to a question form which sends an HTTP multipart request
-@app.route('/post-question')
+@app.route('/post-question', methods=['POST'])
 def HTTP_post_question():
-    course = request.form["course"]
-    question = request.form["question"]
-    # TODO
+    course_dict = {
+        "course": request.form['course'],
+        "question": request.form['question'],
+        "answers": [
+            request.form['a1'],
+            request.form['a2'],
+            request.form['a3'],
+            request.form['a4']
+        ],
+        "correct": request.form['correct']  # character a, b, c, or d
+    }
 
+    # TODO
+    json_str = json.dumps(course_dict)
+    app_ws.emit('STU_new_question', json_str, broadcast=True)
 
 
 if __name__ == "__main__":
-    app_ws.run(app, host='0.0.0.0', port=8000, debug=False, allow_unsafe_werkzeug=True)
+    app_ws.run(app, host='0.0.0.0', port=8000, debug=True, allow_unsafe_werkzeug=True)
