@@ -1,3 +1,4 @@
+import uuid
 from ast import Pass
 import json
 from urllib.parse import uses_query
@@ -45,17 +46,18 @@ socketserver.TCPServer.allow_reuse_address = True
 
 @app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
-
     error = None
+
     if request.cookies.get("user"):
         return redirect("/homepage")
+
     if request.method == "POST":
         # user = request.form["user"]
         # user_type = request.form["user_type"]
 
-        user = request.form['user']
-        password = request.form['password']
-        login = False
+        # user = request.form['user']
+        # password = request.form['password']
+        # login = False
         # for row in users:
         #     if user == row['user'] and password == row['password']:
         #         login = True
@@ -79,29 +81,34 @@ def login():
         #     res = redirect(url_for('login'))
         #     res.set_cookie("user", user)
 
-
         username = request.form['user']
         password = request.form['password']
+
         print("user", username)
         print("pass", password)
-        login_name = users_collection.find_one({"username":username})
-        if login_name != None:
-            kkk = login_name["password"]
-            checking_password = bcrypt.checkpw(password.encode(),kkk)
-            if checking_password:
+
+        document = users_collection.find_one({"username": username})
+        if document is not None:
+            saved_hash = document["password"]
+            hashes_match = bcrypt.checkpw(password.encode(), saved_hash)
+            if hashes_match:
+                # TODO: generate authentication token
+                # TODO: set username, auth-token cookies
+
+                response = make_response(render_template("homepage.html"))
+                response.set_cookie('username', username)
+
+                # auth_token = uuid.uuid4()
+
                 return render_template("homepage.html")
             else:
-                msg = ' The usrname/password is incorrect. '
+                msg = ' The username/password is incorrect. '
                 return render_template("login.html", msg=msg)
+        else:
+            msg = ' Username not found! Register an account first. '
+            return render_template("login.html", msg=msg)
 
-        # return redirect(url_for('home'))
-
-        # result = valid_login(user, request.form["password"])
-        # if True:
-        #     return res
-        # else:
-        #     error = "Entered User or Password were incorrect!"
-    return render_template("login.html", error=error, )
+    return render_template("login.html", error=error)
 
 
 @app.route("/functions.js")
