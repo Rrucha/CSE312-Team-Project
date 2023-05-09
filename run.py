@@ -89,7 +89,7 @@ def login():
             kkk = login_name["password"]
             checking_password = bcrypt.checkpw(password.encode(),kkk)
             if checking_password:
-                return render_template("homepage.html")
+                return redirect("/homepage")
             else:
                 msg = ' The usrname/password is incorrect. '
                 return render_template("login.html", msg=msg)
@@ -101,7 +101,7 @@ def login():
         #     return res
         # else:
         #     error = "Entered User or Password were incorrect!"
-    return render_template("login.html", error=error, )
+    return render_template("login.html", error=error)
 
 
 @app.route("/functions.js")
