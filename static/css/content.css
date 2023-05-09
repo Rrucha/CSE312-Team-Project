@@ -6,6 +6,11 @@
     font-family: sans-serif;
 }
 
+body{
+    font-family: sans-serif;
+    margin: 0;
+}
+
 .nav-bar p,
 .nav-bar a {
   display: inline-block; /* or use "inline" to display them in one line */
@@ -60,14 +65,55 @@
 
 /********************************************** NAV BAR END **********************************************/
 main{
+    width: 100%;
+    height: 100%;
     display: flex;
     font-family: sans-serif;
 }
 
+.create-question{
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    background-color: #e7e9ec;
+    margin-top: 80px;
+    width: 100%;
+    height: 100%;
+}
+
+.create-question h4{
+    text-align: center;
+    padding-top: 30px;
+    color: #203d61;
+    background-color: white;
+    height: 50px;
+    margin: 0;
+    border-top: solid #e7e9ec;
+    border-bottom: solid #e7e9ec;
+}
+
+.create-question p1{
+    color: #203d61;
+}
+
+.create-question div{
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    padding: 20px;
+    margin-left: 70px;
+    margin-right: 80px;
+    background-color: white;
+    height: auto;
+}
+
+
+.create-question div br{
+    border-bottom: solid #e7e9ec;
+}
+
 .nav-left{
     background-color: #f9f9f9;
-    width: 400px;
-    height: 1000px;
+    width: 30%;
+    height: 100%;
     border-right: solid #e7e9ec;
 }
 
@@ -84,7 +130,6 @@ main{
     padding-bottom: 10px;
     margin-top: 20px;
     margin-left: 20px;
-    
 }
 
 button{
@@ -123,10 +168,17 @@ button:hover{
     background-color: #e7e9ec;
 }
 
+.nav-right{
+    height: 100%;
+    width: 70%;
+}
+
 .nav-right-top{
     height: 80;
-    width: 1030px;
+    width: 100%;
+    display: flex;
     border-bottom: solid #e7e9ec;
+    justify-content: space-between;
 }
 .nav-right-top p, button{
     display: inline-block;

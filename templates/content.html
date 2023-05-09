@@ -1,11 +1,13 @@
 <html>
     <head>
         <title>Course</title>
-        <link rel="stylesheet" href="styles/content.css"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/content.css') }}">
+        <link rel="stylesheet" href="../static/css/content.css">
+
     </head>
 
     <nav class="nav-bar">
-        <p>Course Name</p>
+        <p>{{course}}</p>
         <a id="content" href="content.html">CONTENT</a>
         <a id="gradebook" href="gradebook.html">GRADEBOOK</a>
         <a id="students" href="#">STUDENTS</a>
@@ -14,7 +16,7 @@
     <main class="main">
         <div class="nav-left">
             <div class="nav-left-top">
-                <button id="create-btn">Create</button>
+                <button id="create-btn" onclick="showCreate()">Create</button>
             </div>
             <label id="folder" for="folders-content" onclick="toggleOptions()">Week 1 Folder</label>
             <div id="folder-content" name="Week 1 Folder" style="display: none;">
@@ -23,11 +25,37 @@
                 <label>Slide 3</label>
             </div>
         </div>
+        
+        <div id="create-question" class="create-question" style="display: none;">
+            <h4>Create Multiple Choice Questions</h4>
+            <div>
+                <p1>Question Details</p1><br><br>
+                <label for="question-title">Title:</label>
+                <input type="text" id="question-title" name="question-title"><br><br>
+                <label for="question">Question:</label>
+                <input type="text" name="question" id="question">
+                <br><br>
+                <label for="correct-answer">Correct Answer:</label>
+                <input type="text" name="correct-answer" id="correct-answer">
+                <br><br><label for="incorrect-answers">Incorrect Answers:</label><br>
+                <label for="incorrect-answer[]">A</label>
+                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
+                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
+                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
+                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
+                <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
+                <button id="save-question">Save</button>
+            </div>
+
+        </div>
+        
         <div class="nav-right">
             <div class="nav-right-top">
                 <p id="folder-status">Private</p>
-                <button id="present-slide-btn">Present Slides  &#9662</button>
-                <button id="assign-btn">Assign  &#9662</button>
+                <div>
+                    <button id="present-slide-btn">Present Slides  &#9662</button>
+                    <button id="assign-btn">Assign  &#9662</button>
+                </div>
             </div>
             <label id="slide-content">Slide Content</label>
         </div>
@@ -45,6 +73,16 @@
           } else {
             select.style.display = "none";
           }
+        }
+
+        function showCreate(){
+            var question = document.getElementById("create-question");
+            question.style.display = "block";
+        }
+
+        function cancelQuestion(){
+            var question = document.getElementById("create-question");
+            question.style.display = "none";
         }
         </script>
 </html>

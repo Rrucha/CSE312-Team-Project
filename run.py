@@ -9,6 +9,7 @@ from flask_socketio import SocketIO, emit
 import socketserver
 from pymongo import MongoClient
 import bcrypt
+import secrets
 
 app = Flask(__name__)
 app_ws = SocketIO(app)
@@ -23,7 +24,14 @@ courses_collection = db["courses"]
 
 def enrolled_courses(user):
     try:
-        enrolled_codes = users_collection.find({'user': user})[0]['enrolled']
+        #enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
+        #enrolled = []
+        #for i in enrolled_codes:
+            # try:
+            #     enrolled += courses_collection.find({'code': i})
+            # except:
+            #     pass
+        enrolled_codes = users_collection.find_one({'username': user}).get('enrolled', [])  # Get the 'enrolled' field or an empty list if it doesn't exist
         enrolled = []
         for i in enrolled_codes:
             try:
@@ -93,14 +101,17 @@ def login():
             hashes_match = bcrypt.checkpw(password.encode(), saved_hash)
             if hashes_match:
                 # TODO: generate authentication token
-                # TODO: set username, auth-token cookies
+                auth_token = secrets.token_hex(16)  # Generate a 128-bit random token (32 characters)
 
-                response = make_response(render_template("homepage.html"))
-                response.set_cookie('username', username)
+                # TODO: save auth-token, set username, auth-token cookies
+                save_auth_token =  { "$set": { 'auth_token': auth_token } }
+                users_collection.update_one({"username": username}, save_auth_token)
 
-                # auth_token = uuid.uuid4()
+                response = make_response(redirect("/homepage"))
+                response.set_cookie('user', username)
+                response.set_cookie('auth_token', auth_token)
 
-                return render_template("homepage.html")
+                return response
             else:
                 msg = ' The username/password is incorrect. '
                 return render_template("login.html", msg=msg)
@@ -158,12 +169,19 @@ def join_course():
     # except:
     #     code_match = False
 
-    if code_match:
+    if code_match: #if course code exist
         print(1111111111111, code_match, code, user)
-        enrolled_codes = users_collection.find({'user': user})[0]['enrolled']
+
+        #enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
+        user_info =  users_collection.find_one({'username': user})
+        #print("User info: ", user_info)
+        enrolled_codes = user_info.get('enrolled', [])  # Get the 'enrolled' field or an empty list if it doesn't exist
+
         if code not in enrolled_codes:
             enrolled_codes.append(code)
-            users_collection.update_one({'user': user}, {'$set': {'enrolled': enrolled_codes}})
+            users_collection.update_one({'username': user}, {'$set': {'enrolled': enrolled_codes}})
+            #user_info =  users_collection.find_one({'username': user})
+            #print("User info: ", user_info)
         return redirect(f"/course/{code}")
     else:
         error = "code does not exists"
@@ -171,7 +189,7 @@ def join_course():
     return render_template("join_course.html", user=user, error=error)
 
 
-@app.route("/course/<code>", methods=["POST", "GET"])  # create a new auction by the seller
+@app.route("/course/<code>", methods=["POST", "GET"])  
 def enter_course(code):
     error = None
     user = request.cookies.get("user")
@@ -183,8 +201,9 @@ def enter_course(code):
         course = code_match[0]
         if course in enrolled_courses(user) or course in created_courses(user):
             return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error,
-                                   course=course)
-
+                                   course=course['code'])
+            #return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error,
+            #                       course=course)
         return render_template("course.html", user=user, error=error, course=course)
 
     # else:
@@ -212,12 +231,15 @@ def courseslist():
                            created_courses=created_courses(user))
 
 
-@app.route('/homepage')
+@app.route('/homepage', methods=["GET"])
 def homepage():
     error = None
     user = request.cookies.get("user")
     if not user:
+        print("no user found")
         return redirect("/login")
+    else:
+        print("user found and will render hompage.html")
     return render_template(
         "homepage.html", user=user, courses=[i for i in courses_collection.find()]
     )
@@ -236,6 +258,10 @@ def register():
         password = request.form['password']
         print("user", username)
         print("pass", password)
+
+        if users_collection.find_one({"username": username}):
+            error = 'Username already taken.'
+            return render_template("register.html", error=error)
 
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password.encode(), salt)

@@ -6,6 +6,11 @@
     font-family: sans-serif;
 }
 
+body{
+    font-family: sans-serif;
+    margin: 0;
+}
+
 .nav-bar p,
 .nav-bar a {
   display: inline-block; /* or use "inline" to display them in one line */
@@ -97,10 +102,10 @@ main button {
   }
   
   #class-average{
-    margin-left: 350px;
+    margin-left: 380px;
   }
   #based-on{
-    margin-left: 340px;
+    margin-left: 370px;
     font-size: small;
   }
 
