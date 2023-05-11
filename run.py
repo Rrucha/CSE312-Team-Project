@@ -110,7 +110,7 @@ def login():
 
                 response = make_response(redirect("/homepage"))
                 response.set_cookie('user', username)
-                response.set_cookie('auth_token', auth_token)
+                response.set_cookie('auth_token', auth_token, max_age=3600)
 
                 return response
             else:
@@ -207,7 +207,7 @@ def enter_course(code):
                                                      hide_sidebar=True,
                                                      course_nav=True,
                                                      error=None,
-                                                     course=course['code']))
+                                                     course=course))
             response.set_cookie("course-code", code)
             return response
         return render_template("course.html", user=user, error=None, course=course)
@@ -298,12 +298,12 @@ def ws_join_room(course_code):
     join_room(course_code)
 
 
-@app_ws.on('post_question')
-def post_question(course_code, question_data):
-    # Fired by instructors when they press "Post Question"
-    # emit new question to all students in the course room.
-    # question_data is a dict holding all the necessary info for the question.
-    emit('new_question', question_data, to=course_code)
+# @app_ws.on('post_question')
+# def post_question(course_code, question_data):
+#     # Fired by instructors when they press "Post Question"
+#     # emit new question to all students in the course room.
+#     # question_data is a dict holding all the necessary info for the question.
+#     emit('new_question', question_data, to=course_code)
 
 
 @app_ws.on('stop_question')
@@ -330,6 +330,7 @@ def HTTP_post_question():
 
     # TODO
     json_str = json.dumps(course_dict)
+    # Add the question to the database.
     app_ws.emit('new_question', json_str, to=request.cookies.get("course-code"))
     return redirect("/course/" + request.cookies.get("course-code"))
 

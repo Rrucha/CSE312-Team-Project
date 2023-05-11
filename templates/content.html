@@ -3,11 +3,10 @@
         <title>Course</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/content.css') }}">
         <link rel="stylesheet" href="../static/css/content.css">
-
     </head>
 
     <nav class="nav-bar">
-        <p>{{course}}</p>
+        <p>{{course['title']}}</p>
         <a id="content" href="content.html">CONTENT</a>
         <a id="gradebook" href="gradebook.html">GRADEBOOK</a>
         <a id="students" href="#">STUDENTS</a>
@@ -25,7 +24,7 @@
                 <label>Slide 3</label>
             </div>
         </div>
-        
+
         <div id="create-question" class="create-question" style="display: none;">
             <h4>Create Multiple Choice Questions</h4>
             <div>
@@ -48,7 +47,7 @@
             </div>
 
         </div>
-        
+
         <div class="nav-right">
             <div class="nav-right-top">
                 <p id="folder-status">Private</p>
@@ -84,5 +83,12 @@
             var question = document.getElementById("create-question");
             question.style.display = "none";
         }
-        </script>
+    </script>
+    <script type="module" src="/functions.js"></script>
+    <p id="course-code">{{course['code']}}</p>
+    <p id="check"></p>
+    <script>
+        var code = document.getElementById("course-code").innerHTML;
+        document.getElementById("check").innerHTML = code;
+    </script>
 </html>

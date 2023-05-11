@@ -6,6 +6,7 @@ const course_id = document.getElementById("course-code").innerHTML
 
 socket.on("new_question", (json) => {
     // Check if this connection is the instructor. If so, ignore.
+    // TODO: maybe use cookies? Set the course-code and is-instructor cookies so we can get them here in JS.
     // TODO
 })
 
@@ -17,3 +18,8 @@ socket.on("connect", () => {
     // After receiving a response, ask to join the WS room for the course.
     socket.emit("join_room", course_id)
 })
+
+function pasteID() {
+    console.log(document.getElementById("course-code").innerHTML)
+    document.getElementById("check").innerHTML += document.getElementById("course-code").innerHTML
+}
