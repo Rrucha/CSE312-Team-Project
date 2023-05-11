@@ -5,7 +5,7 @@ from urllib.parse import uses_query
 
 from flask import Flask, render_template, redirect, url_for, request, session, make_response, Response, \
     send_from_directory
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 import socketserver
 from pymongo import MongoClient
 import bcrypt
@@ -24,14 +24,15 @@ courses_collection = db["courses"]
 
 def enrolled_courses(user):
     try:
-        #enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
-        #enrolled = []
-        #for i in enrolled_codes:
-            # try:
-            #     enrolled += courses_collection.find({'code': i})
-            # except:
-            #     pass
-        enrolled_codes = users_collection.find_one({'username': user}).get('enrolled', [])  # Get the 'enrolled' field or an empty list if it doesn't exist
+        # enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
+        # enrolled = []
+        # for i in enrolled_codes:
+        # try:
+        #     enrolled += courses_collection.find({'code': i})
+        # except:
+        #     pass
+        enrolled_codes = users_collection.find_one({'username': user}).get('enrolled',
+                                                                           [])  # Get the 'enrolled' field or an empty list if it doesn't exist
         enrolled = []
         for i in enrolled_codes:
             try:
@@ -104,7 +105,7 @@ def login():
                 auth_token = secrets.token_hex(16)  # Generate a 128-bit random token (32 characters)
 
                 # TODO: save auth-token, set username, auth-token cookies
-                save_auth_token =  { "$set": { 'auth_token': auth_token } }
+                save_auth_token = {"$set": {'auth_token': auth_token}}
                 users_collection.update_one({"username": username}, save_auth_token)
 
                 response = make_response(redirect("/homepage"))
@@ -169,19 +170,19 @@ def join_course():
     # except:
     #     code_match = False
 
-    if code_match: #if course code exist
+    if code_match:  # if course code exist
         print(1111111111111, code_match, code, user)
 
-        #enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
-        user_info =  users_collection.find_one({'username': user})
-        #print("User info: ", user_info)
+        # enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
+        user_info = users_collection.find_one({'username': user})
+        # print("User info: ", user_info)
         enrolled_codes = user_info.get('enrolled', [])  # Get the 'enrolled' field or an empty list if it doesn't exist
 
         if code not in enrolled_codes:
             enrolled_codes.append(code)
             users_collection.update_one({'username': user}, {'$set': {'enrolled': enrolled_codes}})
-            #user_info =  users_collection.find_one({'username': user})
-            #print("User info: ", user_info)
+            # user_info =  users_collection.find_one({'username': user})
+            # print("User info: ", user_info)
         return redirect(f"/course/{code}")
     else:
         error = "code does not exists"
@@ -189,22 +190,27 @@ def join_course():
     return render_template("join_course.html", user=user, error=error)
 
 
-@app.route("/course/<code>", methods=["POST", "GET"])  
+@app.route("/course/<code>", methods=["GET"])
 def enter_course(code):
-    error = None
+    # Ask user to log in first if not already logged in
     user = request.cookies.get("user")
     if not user:
         return redirect("/login")
-    # code = request.form["code"]
+
+    # Search for a course that matches the code. If found, and the user is in the course, serve the course page.
     code_match = [i for i in courses_collection.find({'code': code})]
     if code_match:
         course = code_match[0]
         if course in enrolled_courses(user) or course in created_courses(user):
-            return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error,
-                                   course=course['code'])
-            #return render_template("content.html", user=user, hide_sidebar=True, course_nav=True, error=error,
-            #                       course=course)
-        return render_template("course.html", user=user, error=error, course=course)
+            response = make_response(render_template("content.html",
+                                                     user=user,
+                                                     hide_sidebar=True,
+                                                     course_nav=True,
+                                                     error=None,
+                                                     course=course['code']))
+            response.set_cookie("course-code", code)
+            return response
+        return render_template("course.html", user=user, error=None, course=course)
 
     # else:
     #     inserted_course = courses_collection.insert_one({
@@ -216,9 +222,7 @@ def enter_course(code):
     #     #     return 
 
     # return redirect(f"/course/{code}")
-    return render_template(
-        "homepage.html", user=user, error=error
-    )
+    return render_template("homepage.html")
 
 
 @app.route('/courseslist')
@@ -253,7 +257,6 @@ def register():
     if request.cookies.get("user"):
         return redirect("/homepage")
     if request.method == "POST":
-        user = request.form["user"]
         username = request.form['user']
         password = request.form['password']
         print("user", username)
@@ -288,15 +291,26 @@ def index():
     return redirect('/login')
 
 
-@app_ws.on('INS_post_question')
-def post_question(post_course, json):
-    # emit question to all users. Use post_course to filter out students not in the course
-    emit('STU_new_question', post_course, json, broadcast=True)
+@app_ws.on('join_room')
+def ws_join_room(course_code):
+    # Fired by clients after they receive a connection response.
+    # Place the sender into the desired room.
+    join_room(course_code)
 
 
-@app_ws.on('INS_stop_question')
-def stop_question(post_course):
-    emit('STU_stop_question', post_course, broadcast=True)
+@app_ws.on('post_question')
+def post_question(course_code, question_data):
+    # Fired by instructors when they press "Post Question"
+    # emit new question to all students in the course room.
+    # question_data is a dict holding all the necessary info for the question.
+    emit('new_question', question_data, to=course_code)
+
+
+@app_ws.on('stop_question')
+def stop_question(course_code, question_id):
+    # Fired by instructors when they press the "Stop Question" button
+    # Receive it, then send it to all students. Students
+    emit('stop_question', question_id, to=course_code)
 
 
 # Instructors should have access to a question form which sends an HTTP multipart request
@@ -316,7 +330,8 @@ def HTTP_post_question():
 
     # TODO
     json_str = json.dumps(course_dict)
-    app_ws.emit('STU_new_question', json_str, broadcast=True)
+    app_ws.emit('new_question', json_str, to=request.cookies.get("course-code"))
+    return redirect("/course/" + request.cookies.get("course-code"))
 
 
 if __name__ == "__main__":
