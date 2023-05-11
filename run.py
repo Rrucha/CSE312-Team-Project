@@ -110,7 +110,7 @@ def login():
 
                 response = make_response(redirect("/homepage"))
                 response.set_cookie('user', username)
-                response.set_cookie('auth_token', auth_token)
+                response.set_cookie('auth_token', auth_token, max_age=3600)
 
                 return response
             else:
