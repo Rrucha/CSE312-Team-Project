@@ -25,28 +25,27 @@
             </div>
         </div>
 
-        <div id="create-question" class="create-question" style="display: none;">
+        <form action="/post-question" method="post" enctype="multipart/form-data" id="create-question" class="create-question" style="display: none;">
             <h4>Create Multiple Choice Questions</h4>
             <div>
                 <p1>Question Details</p1><br><br>
-                <label for="question-title">Title:</label>
-                <input type="text" id="question-title" name="question-title"><br><br>
+                <input value="{{course['code']}}" name="course" hidden>
                 <label for="question">Question:</label>
                 <input type="text" name="question" id="question">
                 <br><br>
                 <label for="correct-answer">Correct Answer:</label>
                 <input type="text" name="correct-answer" id="correct-answer">
                 <br><br><label for="incorrect-answers">Incorrect Answers:</label><br>
-                <label for="incorrect-answer[]">A</label>
-                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
-                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
-                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
-                <input type="text" name="incorrect-answers[]" class="incorrect-answer"><br><br>
+                <label id="incorrect-answers">A</label>
+                <input type="text" name="a1" class="incorrect-answer"><br><br>
+                <input type="text" name="a2" class="incorrect-answer"><br><br>
+                <input type="text" name="a3" class="incorrect-answer"><br><br>
+                <input type="text" name="a4" class="incorrect-answer"><br><br>
                 <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
-                <button id="save-question">Save</button>
+                <button id="save-question" type="submit">Save</button>
             </div>
 
-        </div>
+        </form>
 
         <div class="nav-right">
             <div class="nav-right-top">

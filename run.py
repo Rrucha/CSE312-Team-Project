@@ -325,7 +325,7 @@ def HTTP_post_question():
             request.form['a3'],
             request.form['a4']
         ],
-        "correct": request.form['correct']  # character a, b, c, or d
+        "correct": request.form['correct-answer']  # character a, b, c, or d
     }
 
     # TODO

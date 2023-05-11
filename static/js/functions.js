@@ -8,6 +8,9 @@ socket.on("new_question", (json) => {
     // Check if this connection is the instructor. If so, ignore.
     // TODO: maybe use cookies? Set the course-code and is-instructor cookies so we can get them here in JS.
     // TODO
+    console.log("question received!")
+    const question = JSON.parse(json);
+    console.log("Question: " + question['question'] + "Answer: " + question['correct'] + "Answers: " + question['answers'][0] + question['answers'][1])
 })
 
 socket.on("STU_stop_question", (post_course) => {
