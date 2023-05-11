@@ -201,13 +201,15 @@ def enter_course(code):
     code_match = [i for i in courses_collection.find({'code': code})]
     if code_match:
         course = code_match[0]
+        is_instructor = course['instructor'] == request.cookies.get("user")
         if course in enrolled_courses(user) or course in created_courses(user):
             response = make_response(render_template("content.html",
                                                      user=user,
                                                      hide_sidebar=True,
                                                      course_nav=True,
                                                      error=None,
-                                                     course=course))
+                                                     course=course,
+                                                     is_instructor=is_instructor))
             response.set_cookie("course-code", code)
             return response
         return render_template("course.html", user=user, error=None, course=course)
