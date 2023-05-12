@@ -46,7 +46,7 @@ def enrolled_courses(user):
 def enrolled_students(code):
     users = []
     for user in users_collection.find():
-        if code in user ['enrolled']
+        if code in user ['enrolled']:
             users.append(user)
         return users
     
@@ -250,7 +250,12 @@ def enter_course(code):
     code_match = [i for i in courses_collection.find({'code': code})]
     if code_match:
         course = code_match[0]
+
         is_instructor = course['instructor'] == request.cookies.get("user")
+
+        q_coll = mongo_client[code]['questions']
+        is_question_active = len([i for i in q_coll.find({'active': 'true'})]) > 0
+
         if course in enrolled_courses(user) or course in created_courses(user):
             response = make_response(render_template("content.html",
                                                      user=user,
@@ -258,8 +263,9 @@ def enter_course(code):
                                                      course_nav=True,
                                                      error=None,
                                                      course=course,
-                                                     is_instructor=is_instructor))
-            response.set_cookie("course-code", code)
+                                                     is_instructor=is_instructor,
+                                                     is_question_active=is_question_active))
+            response.set_cookie("course-code", code) # TODO: remove?
             return response
         return render_template("course.html", user=user, error=None, course=course)
 
@@ -274,7 +280,6 @@ def enter_course(code):
 
     # return redirect(f"/course/{code}")
     return render_template("homepage.html")
-
 
 
 @app.route('/courseslist')
@@ -316,22 +321,21 @@ def ws_join_room(course_code):
 #     emit('new_question', question_data, to=course_code)
 
 
-@app_ws.on('FROMINS_stop_question')
-def stop_question(course_code):
-    # Fired by instructors when they press the "Stop Question" button
-    # Receive it, then send it to all students.
+# @app_ws.on('FROMINS_stop_question')
+# def stop_question(course_code):
+#     # Fired by instructors when they press the "Stop Question" button
+#     # Receive it, then send it to all students.
+#
+#
+#
+#     emit('TOSTU_stop_question', to=course_code)
 
-    # TODO: set the current question's "active" element to false.
-    # TODO: iterate through current answers collection, updating all students' grades.
 
-    emit('TOSTU_stop_question', to=course_code)
-
-
-@app_ws.on('FROMSTU_answer_question')
+@app_ws.on('answer_question')
 def answer_question(course, user, answer):
     # Fired by students when they press the "Submit" button on an active question.
     # Save their answer to the course's "answers" collection.
-    print(course, user, answer)
+    # print(course, user, answer)
     mongo_client[course]['current-answers'].insert_one({
         "user": user,
         "answer": answer
@@ -374,8 +378,10 @@ def post_question():
 
     json_str = json.dumps(course_dict)
 
+    # print(request.form)
+
     # Add the question to the "questions" collection, and reset the "answers" collection.
-    course_code = request.cookies.get("course-code")
+    course_code = request.form['course-code']
     course_db = mongo_client[course_code]
 
     questions_coll = course_db['questions']
@@ -385,6 +391,23 @@ def post_question():
 
     # Send the question to all students, and then reload the page for the instructor.
     app_ws.emit('new_question', json_str, to=course_code)
+    return redirect("/course/" + course_code)
+
+
+@app.route('/stop-question', methods=['POST'])
+def stop_question():
+    # Deactivates the question, grades all students, and redirects the instructor back to the course homepage.
+    # TODO: set the current question's "active" element to false.
+    # TODO: iterate through current answers collection, updating all students' grades.
+
+    course_code = request.form['course-code']
+    q_coll = mongo_client[course_code]['questions']
+
+    if q_coll.find_one({'active': 'true'}):
+        q_coll.update_one({'active': 'true'}, {"$set": {'active': 'false'}})
+
+    app_ws.emit('stop_question', to=course_code)
+
     return redirect("/course/" + course_code)
 
 

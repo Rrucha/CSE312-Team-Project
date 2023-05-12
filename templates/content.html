@@ -15,7 +15,7 @@
     <main class="main">
         <div class="nav-left">
             <div class="nav-left-top">
-                {% if is_instructor == true %}
+                {% if is_instructor == true and is_question_active == false %}
                 <button id="create-btn" onclick="showCreate()">Create</button>
                 {% endif %}
             </div>
@@ -30,6 +30,7 @@
         <form action="/post-question" method="post" enctype="multipart/form-data" id="create-question" class="create-question" style="display: none;">
             <h4>Create Multiple Choice Questions</h4>
             <div>
+                <input name="course-code" value="{{ course['code'] }}" hidden>
                 <p1>Question Details</p1><br><br>
                 <label for="question">Question:</label>
                 <input type="text" name="question" id="question">
@@ -70,6 +71,13 @@
 
                 <button type="button" id="q_button">Submit</button>
             </form>
+
+            {% if is_question_active == true and is_instructor == true %}
+            <form action="/stop-question" method="post" enctype="multipart/form-data">
+                <input type="text" name="course-code" value="{{ course['code'] }}" hidden>
+                <button id="stop_question" type="submit">Stop Question</button>
+            </form>
+            {% endif %}
         </div>
 
         <div>

@@ -7,19 +7,27 @@ const course_id = document.getElementById("course-code").innerHTML
 socket.on("new_question", (json) => {
     console.log("question received!")
     const question = JSON.parse(json);
-    document.getElementById("question_form").disabled = false
-    document.getElementById("question_form").style.visibility = 'visible'
     document.getElementById("q_question").innerHTML = question['question']
     document.getElementById("q_a1").innerHTML = question['answers'][0]
     document.getElementById("q_a2").innerHTML = question['answers'][1]
     document.getElementById("q_a3").innerHTML = question['answers'][2]
     document.getElementById("q_a4").innerHTML = question['answers'][3]
+    document.getElementById("question_form").style.visibility = 'visible'
+
+    var choices = document.getElementsByName("q_choice");
+    for (var i = 0; i < choices.length; i++) {
+        choices[i].disabled = false;
+    }
+
     // console.log("Question: " + question['question'] + "Answer: " + question['correct'] + "Answers: " + question['answers'][0] + question['answers'][1])
     // document.getElementById("slide-content").innerHTML = "Question: " + question['question'] + "Answer: " + question['correct'] + "Answers: " + question['answers'][0] + question['answers'][1]
 })
 
-socket.on("TOSTU_stop_question", (post_course) => {
+socket.on("stop_question", () => {
     // TODO: modify the HTML to disable the question, regardless of whether or not it was answered.
+    document.getElementById("question_form").style.visibility = 'hidden'
+
+    console.log("question stopped!")
 })
 
 socket.on("connect", () => {
@@ -42,16 +50,16 @@ function answerQuestion() {
     console.log("Choices: " + document.getElementsByName("q_choice").length);
 
 
-    socket.emit("FROMSTU_answer_question", course_id, getCookie("user"), answer);
+    socket.emit("answer_question", course_id, getCookie("user"), answer);
 }
 
 document.getElementById("q_button").addEventListener("click", answerQuestion);
 
-function stopQuestion() {
-    console.log("Stopping question.");
-
-    socket.emit("FROMINS_stop_question", course_id);
-}
+//function stopQuestion() {
+//    console.log("Stopping question.");
+//
+//    socket.emit("stop_question", course_id);
+//}
 
 // document.getElementById("stop_question").addEventListener("click", stopQuestion);
 
