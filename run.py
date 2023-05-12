@@ -1,8 +1,9 @@
+from turtle import tilt, title
 import uuid
 from ast import Pass
 import json
 from urllib.parse import uses_query
-
+import html
 from flask import Flask, render_template, redirect, url_for, request, session, make_response, Response, \
     send_from_directory
 from flask_socketio import SocketIO, emit, join_room
@@ -103,7 +104,9 @@ def login():
         #     res.set_cookie("user", user)
 
         username = request.form['user']
+        username = html.escape(username)
         password = request.form['password']
+        password = html.escape(password)
 
         print("user", username)
         print("pass", password)
@@ -186,14 +189,19 @@ def create_course():
         return redirect("/login")
     if request.method == "POST":
         code = request.form["code"]
+        code = html.escape(code)
         code_match = [i for i in courses_collection.find({'code': code})]
         print(code_match)
         if code_match:
             error = "code already exists"
         else:
-            inserted_course = courses_collection.insert_one({
-                'title': request.form["title"],
-                'description': request.form["description"],
+            title = request.form["title"]
+            title = html.escape(title)
+            describ = request.form["description"]
+            describ = html.escape(describ)
+            courses_collection.insert_one({
+                'title': title,
+                'description': describ,
                 'code': code,
                 'instructor': user})
             # if inserted_course.acknowledged:
@@ -385,9 +393,11 @@ def get_current_question():
 # Instructors should have access to a question form which sends an HTTP multipart request
 @app.route('/post-question', methods=['POST'])
 def post_question():
+    question = request.form['question']
+    question = html.escape(question)
     course_dict = {
         "active": "true",
-        "question": request.form['question'],
+        "question": question,
         "answers": [
             request.form['a1'],
             request.form['a2'],
