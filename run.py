@@ -43,6 +43,13 @@ def enrolled_courses(user):
         enrolled = []
     return enrolled
 
+def enrolled_students(code):
+    users = []
+    for user in users_collection.find():
+        if code in user ['enrolled']
+            users.append(user)
+        return users
+    
 
 def created_courses(user):
     created = [i for i in courses_collection.find({'instructor': user})]
@@ -267,6 +274,7 @@ def enter_course(code):
 
     # return redirect(f"/course/{code}")
     return render_template("homepage.html")
+
 
 
 @app.route('/courseslist')
