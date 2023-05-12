@@ -395,16 +395,26 @@ def get_current_question():
 def post_question():
     question = request.form['question']
     question = html.escape(question)
+    correcr_ans = request.form['correct-answer']
+    correcr_ans = html.escape(correcr_ans)
+    A1 =  request.form['a1']
+    A1 = html.escape(A1)
+    A2 =  request.form['a2']
+    A2 = html.escape(A2)
+    A3 =  request.form['a3']
+    A3 = html.escape(A3)
+    A4 =  request.form['a4']
+    A4 = html.escape(A4)
     course_dict = {
         "active": "true",
         "question": question,
         "answers": [
-            request.form['a1'],
-            request.form['a2'],
-            request.form['a3'],
-            request.form['a4']
+            A1,
+            A2,
+            A3,
+            A4
         ],
-        "correct": request.form['correct-answer']  # character a, b, c, or d
+        "correct": correcr_ans  # character a, b, c, or d
     }
 
     json_str = json.dumps(course_dict)
@@ -413,6 +423,7 @@ def post_question():
 
     # Add the question to the "questions" collection, and reset the "answers" collection.
     course_code = request.form['course-code']
+    course_code = html.escape(course_code)
     course_db = mongo_client[course_code]
 
     questions_coll = course_db['questions']
@@ -432,6 +443,7 @@ def stop_question():
     # TODO: iterate through current answers collection, updating all students' grades.
 
     course_code = request.form['course-code']
+    course_code = html.escape(course_code)
     q_coll = mongo_client[course_code]['questions']
 
     if q_coll.find_one({'active': 'true'}):
