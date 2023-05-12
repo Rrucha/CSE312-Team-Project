@@ -3,13 +3,19 @@
         <title>Course</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/content.css') }}">
         <link rel="stylesheet" href="../static/css/content.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
 
     <nav class="nav-bar">
         <p>{{course['title']}}</p>
         <a id="content" href="/course/{{course['code']}}">CONTENT</a>
         <a id="gradebook" href="/gradebook/{{course['code']}}">GRADEBOOK</a>
-        <a id="students" href="#">STUDENTS</a>
+        <!--<a id="students" href="#">STUDENTS</a>-->
+
+        <a class="logout" href="/logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Log Out</span>
+        </a>
     </nav>
 
     <main class="main">
@@ -29,22 +35,24 @@
 
         <form action="/post-question" method="post" enctype="multipart/form-data" id="create-question" class="create-question" style="display: none;">
             <h4>Create Multiple Choice Questions</h4>
-            <div>
-                <input name="course-code" value="{{ course['code'] }}" hidden>
-                <p1>Question Details</p1><br><br>
-                <label for="question">Question:</label>
-                <input type="text" name="question" id="question">
-                <br><br>
-                <label for="correct-answer">Correct Answer:</label>
-                <input type="text" name="correct-answer" id="correct-answer">
-                <br><br><label for="incorrect-answers">Incorrect Answers:</label><br>
-                <label id="incorrect-answers">A</label>
-                <input type="text" name="a1" class="incorrect-answer"><br><br>
-                <input type="text" name="a2" class="incorrect-answer"><br><br>
-                <input type="text" name="a3" class="incorrect-answer"><br><br>
-                <input type="text" name="a4" class="incorrect-answer"><br><br>
-                <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
-                <button id="save-question" type="submit">Save</button>
+            <div id="question_container1">
+                <div id="question_container2">
+                    <input name="course-code" value="{{ course['code'] }}" hidden>
+                    <p1>Question Details</p1><br><br>
+                    <label for="question">Question:</label><br>
+                    <input type="text" name="question" id="question" placeholder="Write your question here...">
+                    <br><br>
+                    <label for="correct-answer">Correct Answer:</label><br>
+                    <input type="text" name="correct-answer" id="correct-answer" placeholder="Write a response...">
+                    <br><br><label for="incorrect-answers">Incorrect Answers:</label><br>
+                    <label id="incorrect-answers"></label>
+                    <input type="text" name="a1" class="incorrect-answer" placeholder="Write a response..."><br><br>
+                    <input type="text" name="a2" class="incorrect-answer" placeholder="Write a response..."><br><br>
+                    <input type="text" name="a3" class="incorrect-answer" placeholder="Write a response..."><br><br>
+                    <input type="text" name="a4" class="incorrect-answer" placeholder="Write a response..."><br><br>
+                    <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
+                    <button id="save-question" type="submit">Save</button>
+                </div>  
             </div>
 
         </form>
@@ -60,16 +68,26 @@
 
             <form id="question_form" style="visibility: hidden;">
                 <p id="q_question"></p>
-                <input type="radio" name="q_choice" value="a1">
-                <label id="q_a1"></label><br>
-                <input type="radio" name="q_choice" value="a2">
-                <label id="q_a2"></label><br>
-                <input type="radio" name="q_choice" value="a3">
-                <label id="q_a3"></label><br>
-                <input type="radio" name="q_choice" value="a4">
-                <label id="q_a4"></label><br>
-
-                <button type="button" id="q_button">Submit</button>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a1">
+                    <label id="q_a1"></label>a1<br>
+                </div>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a2">
+                    <label id="q_a2"></label>a2<br>
+                </div>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a3">
+                    <label id="q_a3"></label>a3<br>
+                </div>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a4">
+                    <label id="q_a4"></label>a4<br>
+                </div>
+                
+                <div id="q_button_container">
+                    <button type="button" id="q_button"><i class="fa fa-paper-plane-o"></i>Submit</button>
+                </div>
             </form>
 
             {% if is_question_active == true and is_instructor == true %}
