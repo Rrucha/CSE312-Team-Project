@@ -53,6 +53,11 @@ def created_courses(user):
 socketserver.TCPServer.allow_reuse_address = True
 
 
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return redirect('/login')
+
+
 @app.route("/login", methods=["POST", "GET"])  # login system is cookie based
 def login():
     error = None
@@ -123,9 +128,41 @@ def login():
     return render_template("login.html", error=error)
 
 
-@app.route("/websockets.js")
-def websockets_js():
-    return send_from_directory('static', 'js/websockets.js')
+@app.route("/register", methods=["POST", "GET"])  # register system to login
+def register():
+    print("text")
+
+    error = None
+    if request.cookies.get("user"):
+        return redirect("/homepage")
+    if request.method == "POST":
+        username = request.form['user']
+        password = request.form['password']
+        print("user", username)
+        print("pass", password)
+
+        if users_collection.find_one({"username": username}):
+            error = 'Username already taken.'
+            return render_template("register.html", error=error)
+
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode(), salt)
+        users_collection.insert_one({"username": username, "password": hashed_password})
+
+        msg = 'You have successfully registered !'
+
+        return render_template("login.html", msg=msg)
+    else:
+        return render_template("register.html", error=error)
+
+
+@app.route("/logout", methods=["POST", "GET"])  # logout by deleting the cookie
+def logout():
+    print("logout")
+    error = None
+    res = make_response(render_template("login.html", error=error))
+    res.set_cookie("user", "", expires=0)
+    return res
 
 
 @app.route("/functions.js")
@@ -256,48 +293,6 @@ def homepage():
     )
 
 
-@app.route("/register", methods=["POST", "GET"])  # register system to login
-def register():
-    print("text")
-
-    error = None
-    if request.cookies.get("user"):
-        return redirect("/homepage")
-    if request.method == "POST":
-        username = request.form['user']
-        password = request.form['password']
-        print("user", username)
-        print("pass", password)
-
-        if users_collection.find_one({"username": username}):
-            error = 'Username already taken.'
-            return render_template("register.html", error=error)
-
-        salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(password.encode(), salt)
-        users_collection.insert_one({"username": username, "password": hashed_password})
-
-        msg = 'You have successfully registered !'
-
-        return render_template("login.html", msg=msg)
-    else:
-        return render_template("register.html", error=error)
-
-
-@app.route("/logout", methods=["POST", "GET"])  # logout by deleting the cookie
-def logout():
-    print("logout")
-    error = None
-    res = make_response(render_template("login.html", error=error))
-    res.set_cookie("user", "", expires=0)
-    return res
-
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return redirect('/login')
-
-
 @app_ws.on('join_room')
 def ws_join_room(course_code):
     # Fired by clients after they receive a connection response.
@@ -313,21 +308,50 @@ def ws_join_room(course_code):
 #     emit('new_question', question_data, to=course_code)
 
 
-@app_ws.on('stop_question')
-def stop_question(course_code, question_id):
+@app_ws.on('FROMINS_stop_question')
+def stop_question(course_code):
     # Fired by instructors when they press the "Stop Question" button
-    # Receive it, then send it to all students. Students
-    emit('stop_question', question_id, to=course_code)
+    # Receive it, then send it to all students.
+
+    # TODO: set the current question's "active" element to false.
+    # TODO: iterate through current answers collection, updating all students' grades.
+
+    emit('TOSTU_stop_question', to=course_code)
 
 
-@app.route('/answer-question', methods=['POST'])
-def answer_question():
-    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+@app_ws.on('FROMSTU_answer_question')
+def answer_question(course, user, answer):
+    # Fired by students when they press the "Submit" button on an active question.
+    # Save their answer to the course's "answers" collection.
+    print(course, user, answer)
+    mongo_client[course]['current-answers'].insert_one({
+        "user": user,
+        "answer": answer
+    })
+
+
+@app.route('/current-question')
+def get_current_question():
+    course_code = request.cookies.get('course-code')
+    course_db = mongo_client[course_code]
+
+    active_question = course_db['questions'].find_one({'active': 'true'})
+
+    q_dict = {}
+
+    if active_question:
+        q_dict = {
+            "question": active_question['question'],
+            "answers": active_question['answers'],
+            "correct": active_question['correct']  # character a, b, c, or d
+        }
+
+    return json.dumps(q_dict), 200, {'ContentType': 'application/json'}
 
 
 # Instructors should have access to a question form which sends an HTTP multipart request
 @app.route('/post-question', methods=['POST'])
-def HTTP_post_question():
+def post_question():
     course_dict = {
         "active": "true",
         "question": request.form['question'],
@@ -340,16 +364,18 @@ def HTTP_post_question():
         "correct": request.form['correct-answer']  # character a, b, c, or d
     }
 
-    # TODO
-
     json_str = json.dumps(course_dict)
 
-    # Add the question to the database.
+    # Add the question to the "questions" collection, and reset the "answers" collection.
     course_code = request.cookies.get("course-code")
-    course_db = db[course_code]
+    course_db = mongo_client[course_code]
+
     questions_coll = course_db['questions']
     questions_coll.insert_one(course_dict)
 
+    course_db['current-answers'].drop()
+
+    # Send the question to all students, and then reload the page for the instructor.
     app_ws.emit('new_question', json_str, to=course_code)
     return redirect("/course/" + course_code)
 

@@ -68,13 +68,14 @@
                 <input type="radio" name="q_choice" value="a4">
                 <label id="q_a4"></label><br>
 
-                <button type="button" onclick="answerQuestion()">Submit</button>
+                <button type="button" id="q_button">Submit</button>
             </form>
         </div>
 
         <div>
 
         </div>
+        <p id="course-code" hidden>{{course['code']}}</p>
     </main>
 
     <script>
@@ -97,12 +98,6 @@
             question.style.display = "none";
         }
     </script>
-    <script type="module" src="/websockets.js"></script>
-    <script src="/functions.js"></script>
-    <p id="course-code">{{course['code']}}</p>
-    <p id="check"></p>
-    <script>
-        var code = document.getElementById("course-code").innerHTML;
-        document.getElementById("check").innerHTML = code;
-    </script>
+    <script id="javascript" type="module" src="/functions.js"></script>
+<!--    <script src="/functions.js" onload="getQuestion()"></script>-->
 </html>
