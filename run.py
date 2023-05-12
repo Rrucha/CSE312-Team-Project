@@ -329,7 +329,7 @@ def answer_question():
 @app.route('/post-question', methods=['POST'])
 def HTTP_post_question():
     course_dict = {
-        "course": request.form['course'],
+        "active": "true",
         "question": request.form['question'],
         "answers": [
             request.form['a1'],
@@ -341,10 +341,17 @@ def HTTP_post_question():
     }
 
     # TODO
+
     json_str = json.dumps(course_dict)
+
     # Add the question to the database.
-    app_ws.emit('new_question', json_str, to=request.cookies.get("course-code"))
-    return redirect("/course/" + request.cookies.get("course-code"))
+    course_code = request.cookies.get("course-code")
+    course_db = db[course_code]
+    questions_coll = course_db['questions']
+    questions_coll.insert_one(course_dict)
+
+    app_ws.emit('new_question', json_str, to=course_code)
+    return redirect("/course/" + course_code)
 
 
 if __name__ == "__main__":
