@@ -38,7 +38,7 @@
                                             <td><a href="/course/{{course['code']}}"><b>{{course['title']}}</b></a></td>
                                             <td>{{course['description'][:30]}}</td>
                                             <td>{{course['instructor']}}</td>
-                                            <td><a href="/course_detail" class="text-primary">View</a></td>
+                                            <td><a href="/course/{{course['code']}}" class="text-primary">View</a></td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

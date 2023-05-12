@@ -471,6 +471,11 @@ h6 {
     margin-bottom: 5px;
 }
 
+.sidebar-nav .nav-item:active{
+    color: #4154f1;
+    background-color: #f6f9ff;
+}
+
 .sidebar-nav .nav-heading {
     font-size: 11px;
     text-transform: uppercase;
@@ -486,7 +491,7 @@ h6 {
     font-weight: 600;
     color: #4154f1;
     transition: 0.3;
-    background: #f6f9ff;
+ /*   background: #f6f9ff;*/
     padding: 10px 15px;
     border-radius: 4px;
 }

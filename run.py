@@ -281,8 +281,29 @@ def enter_course(code):
     # return redirect(f"/course/{code}")
     return render_template("homepage.html")
 
+@app.route('/gradebook/<code>')
+def gradebook(code):
+    print("User is now in gradebook")
+    user = request.cookies.get("user")
+    if not user:
+        return redirect("/login")
 
-@app.route('/courseslist')
+    # Search for a course that matches the code. If found, and the user is in the course, serve the course page.
+    code_match = [i for i in courses_collection.find({'code': code})]
+    if code_match:
+        course = code_match[0]
+
+        is_instructor = course['instructor'] == request.cookies.get("user")
+
+        if course in enrolled_courses(user) or course in created_courses(user):
+
+            return render_template('gradebook.html', code = code,
+                                                    user = user,
+                                                    course=course)
+    
+    return render_template("homepage.html")
+
+@app.route('/courseslist', methods=["GET"])
 def courseslist():
     error = ""
     user = request.cookies.get("user")
