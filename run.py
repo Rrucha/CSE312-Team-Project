@@ -43,7 +43,7 @@ def enrolled_courses(user):
         enrolled = []
     return enrolled
 
-def enrolled_courses(user):
+def enrolled_students(code):
     users = []
     for user in users_collection.find():
         if code in user ['enrolled']
@@ -205,7 +205,6 @@ def join_course():
 @app.route("/course/<code>", methods=["GET"])
 def enter_course(code):
     # Ask user to log in first if not already logged in
-    error = None
     user = request.cookies.get("user")
     if not user:
         return redirect("/login")
@@ -239,7 +238,7 @@ def enter_course(code):
     # return redirect(f"/course/{code}")
     return render_template("homepage.html")
 
-@app.route("")
+
 
 @app.route('/courseslist')
 def courseslist():
