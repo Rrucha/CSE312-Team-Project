@@ -123,6 +123,11 @@ def login():
     return render_template("login.html", error=error)
 
 
+@app.route("/websockets.js")
+def websockets_js():
+    return send_from_directory('static', 'js/websockets.js')
+
+
 @app.route("/functions.js")
 def functions_js():
     return send_from_directory('static', 'js/functions.js')
@@ -313,6 +318,11 @@ def stop_question(course_code, question_id):
     # Fired by instructors when they press the "Stop Question" button
     # Receive it, then send it to all students. Students
     emit('stop_question', question_id, to=course_code)
+
+
+@app.route('/answer-question', methods=['POST'])
+def answer_question():
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
 # Instructors should have access to a question form which sends an HTTP multipart request

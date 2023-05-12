@@ -57,7 +57,20 @@
                     <button id="assign-btn">Assign  &#9662</button>
                 </div>
             </div>
-            <label id="slide-content">Slide Content</label>
+
+            <form id="question_form" style="visibility: hidden;">
+                <p id="q_question"></p>
+                <input type="radio" name="q_choice" value="a1">
+                <label id="q_a1"></label><br>
+                <input type="radio" name="q_choice" value="a2">
+                <label id="q_a2"></label><br>
+                <input type="radio" name="q_choice" value="a3">
+                <label id="q_a3"></label><br>
+                <input type="radio" name="q_choice" value="a4">
+                <label id="q_a4"></label><br>
+
+                <button type="button" onclick="answerQuestion()">Submit</button>
+            </form>
         </div>
 
         <div>
@@ -85,7 +98,8 @@
             question.style.display = "none";
         }
     </script>
-    <script type="module" src="/functions.js"></script>
+    <script type="module" src="/websockets.js"></script>
+    <script src="/functions.js"></script>
     <p id="course-code">{{course['code']}}</p>
     <p id="check"></p>
     <script>

@@ -1,28 +1,16 @@
-import { io } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
+function answerQuestion() {
+    console.log("Question answered")
 
-const socket = io("http://localhost:8080/")
+    choices = document.getElementsByName("q_choice")
+    for (var i = 0; i < choices.length; i++) {
+        choices[i].disabled = true
+    }
+    console.log("Choices: " + document.getElementsByName("q_choice").length)
 
-const course_id = document.getElementById("course-code").innerHTML
-
-socket.on("new_question", (json) => {
-    // Check if this connection is the instructor. If so, ignore.
-    // TODO: maybe use cookies? Set the course-code and is-instructor cookies so we can get them here in JS.
-    // TODO
-    console.log("question received!")
-    const question = JSON.parse(json);
-    console.log("Question: " + question['question'] + "Answer: " + question['correct'] + "Answers: " + question['answers'][0] + question['answers'][1])
-})
-
-socket.on("STU_stop_question", (post_course) => {
-
-})
-
-socket.on("connect", () => {
-    // After receiving a response, ask to join the WS room for the course.
-    socket.emit("join_room", course_id)
-})
-
-function pasteID() {
-    console.log(document.getElementById("course-code").innerHTML)
-    document.getElementById("check").innerHTML += document.getElementById("course-code").innerHTML
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (this.readyState === 4 && this.status === 200) { }
+    };
+    request.open("POST", "/answer-question");
+    request.send();
 }
