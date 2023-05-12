@@ -130,6 +130,11 @@ def login():
     return render_template("login.html", error=error)
 
 
+@app.route("/websockets.js")
+def websockets_js():
+    return send_from_directory('static', 'js/websockets.js')
+
+
 @app.route("/functions.js")
 def functions_js():
     return send_from_directory('static', 'js/functions.js')
@@ -209,13 +214,15 @@ def enter_course(code):
     code_match = [i for i in courses_collection.find({'code': code})]
     if code_match:
         course = code_match[0]
+        is_instructor = course['instructor'] == request.cookies.get("user")
         if course in enrolled_courses(user) or course in created_courses(user):
             response = make_response(render_template("content.html",
                                                      user=user,
                                                      hide_sidebar=True,
                                                      course_nav=True,
                                                      error=None,
-                                                     course=course))
+                                                     course=course,
+                                                     is_instructor=is_instructor))
             response.set_cookie("course-code", code)
             return response
         return render_template("course.html", user=user, error=None, course=course)
@@ -322,11 +329,16 @@ def stop_question(course_code, question_id):
     emit('stop_question', question_id, to=course_code)
 
 
+@app.route('/answer-question', methods=['POST'])
+def answer_question():
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
 # Instructors should have access to a question form which sends an HTTP multipart request
 @app.route('/post-question', methods=['POST'])
 def HTTP_post_question():
     course_dict = {
-        "course": request.form['course'],
+        "active": "true",
         "question": request.form['question'],
         "answers": [
             request.form['a1'],
@@ -338,10 +350,17 @@ def HTTP_post_question():
     }
 
     # TODO
+
     json_str = json.dumps(course_dict)
+
     # Add the question to the database.
-    app_ws.emit('new_question', json_str, to=request.cookies.get("course-code"))
-    return redirect("/course/" + request.cookies.get("course-code"))
+    course_code = request.cookies.get("course-code")
+    course_db = db[course_code]
+    questions_coll = course_db['questions']
+    questions_coll.insert_one(course_dict)
+
+    app_ws.emit('new_question', json_str, to=course_code)
+    return redirect("/course/" + course_code)
 
 
 if __name__ == "__main__":

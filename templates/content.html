@@ -15,7 +15,9 @@
     <main class="main">
         <div class="nav-left">
             <div class="nav-left-top">
+                {% if is_instructor == true %}
                 <button id="create-btn" onclick="showCreate()">Create</button>
+                {% endif %}
             </div>
             <label id="folder" for="folders-content" onclick="toggleOptions()">Week 1 Folder</label>
             <div id="folder-content" name="Week 1 Folder" style="display: none;">
@@ -29,7 +31,6 @@
             <h4>Create Multiple Choice Questions</h4>
             <div>
                 <p1>Question Details</p1><br><br>
-                <input value="{{course['code']}}" name="course" hidden>
                 <label for="question">Question:</label>
                 <input type="text" name="question" id="question">
                 <br><br>
@@ -55,7 +56,20 @@
                     <button id="assign-btn">Assign  &#9662</button>
                 </div>
             </div>
-            <label id="slide-content">Slide Content</label>
+
+            <form id="question_form" style="visibility: hidden;">
+                <p id="q_question"></p>
+                <input type="radio" name="q_choice" value="a1">
+                <label id="q_a1"></label><br>
+                <input type="radio" name="q_choice" value="a2">
+                <label id="q_a2"></label><br>
+                <input type="radio" name="q_choice" value="a3">
+                <label id="q_a3"></label><br>
+                <input type="radio" name="q_choice" value="a4">
+                <label id="q_a4"></label><br>
+
+                <button type="button" onclick="answerQuestion()">Submit</button>
+            </form>
         </div>
 
         <div>
@@ -83,7 +97,8 @@
             question.style.display = "none";
         }
     </script>
-    <script type="module" src="/functions.js"></script>
+    <script type="module" src="/websockets.js"></script>
+    <script src="/functions.js"></script>
     <p id="course-code">{{course['code']}}</p>
     <p id="check"></p>
     <script>
