@@ -14,7 +14,7 @@
 
         <a class="logout" href="/logout">
             <i class="bi bi-box-arrow-right"></i>
-            <span>Log Out</span>
+            <span>{{ user }} - Log Out</span>
         </a>
     </nav>
 
@@ -60,16 +60,16 @@
                 <input type="text" name="question" id="question">
                 <br><br>
                 <label id="choice_header">Choices:</label><br>
-                <input type="radio" name="a1_rad">
+                <input type="radio" name="cq_rad" value="1">
                     <input type="text" name="a1" class="cq_choice"><br>
-                <input type="radio" name="a2_rad">
+                <input type="radio" name="cq_rad" value="1">
                     <input type="text" name="a2" class="cq_choice"><br>
-                <input type="radio" name="a3_rad">
+                <input type="radio" name="cq_rad" value="1">
                     <input type="text" name="a3" class="cq_choice"><br>
-                <input type="radio" name="a4_rad">
+                <input type="radio" name="cq_rad" value="1">
                     <input type="text" name="a4" class="cq_choice"><br><br>
                 <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
-                <button id="save-question" type="submit">Save</button>
+                <button id="save-question" type="submit" disabled>Save</button>
             </div>
 
         </form>
@@ -85,21 +85,21 @@
 
             <form id="question_form" style="visibility: hidden;">
                 <p id="q_question"></p>
-                <div id="answer_question">
-                    <input type="radio" name="q_choice" value="a1">
-                    <label id="q_a1"></label>a1<br>
+                <div class="answer_question">
+                    <input type="radio" name="q_choice" value="1">
+                    <label id="q_a1"></label><br>
                 </div>
-                <div id="answer_question">
-                    <input type="radio" name="q_choice" value="a2">
-                    <label id="q_a2"></label>a2<br>
+                <div class="answer_question">
+                    <input type="radio" name="q_choice" value="2">
+                    <label id="q_a2"></label><br>
                 </div>
-                <div id="answer_question">
-                    <input type="radio" name="q_choice" value="a3">
-                    <label id="q_a3"></label>a3<br>
+                <div class="answer_question">
+                    <input type="radio" name="q_choice" value="3">
+                    <label id="q_a3"></label><br>
                 </div>
-                <div id="answer_question">
-                    <input type="radio" name="q_choice" value="a4">
-                    <label id="q_a4"></label>a4<br>
+                <div class="answer_question">
+                    <input type="radio" name="q_choice" value="4">
+                    <label id="q_a4"></label><br>
                 </div>
 
                 <div id="q_button_container">

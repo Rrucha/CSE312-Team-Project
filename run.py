@@ -43,13 +43,14 @@ def enrolled_courses(user):
         enrolled = []
     return enrolled
 
+
 def enrolled_students(code):
     users = []
     for user in users_collection.find():
-        if code in user ['enrolled']:
+        if code in user['enrolled']:
             users.append(user)
         return users
-    
+
 
 def created_courses(user):
     created = [i for i in courses_collection.find({'instructor': user})]
@@ -73,35 +74,6 @@ def login():
         return redirect("/homepage")
 
     if request.method == "POST":
-        # user = request.form["user"]
-        # user_type = request.form["user_type"]
-
-        # user = request.form['user']
-        # password = request.form['password']
-        # login = False
-        # for row in users:
-        #     if user == row['user'] and password == row['password']:
-        #         login = True
-        #         break
-        # try:
-        #     users_collection.find({'user': user})[0]['enrolled']
-        # except:
-        #     users_collection.insert_one({
-        #         'user': user,
-        #         'password': password,
-        #         'enrolled': [],
-        #         'created': []})
-        # login = True  # temp allow all user to login
-        # if request.form['user'] == '' or password == '':
-        #     res = redirect(url_for('homepage'))
-        #     res.set_cookie("user", user)
-        # elif login:
-        #     res = redirect(url_for('homepage'))
-        #     res.set_cookie("user", user)
-        # else:
-        #     res = redirect(url_for('login'))
-        #     res.set_cookie("user", user)
-
         username = request.form['user']
         username = html.escape(username)
         password = request.form['password']
@@ -222,23 +194,31 @@ def join_course():
         code = None
     if request.method == "POST" and not code:
         code = request.form["code"]
-    code_match = [i for i in courses_collection.find({'code': code})]
+    course_doc = courses_collection.find_one({'code': code})
     # except:
     #     code_match = False
 
-    if code_match:  # if course code exist
-        print(1111111111111, code_match, code, user)
+    if course_doc:  # if course code exist
+        print(1111111111111, course_doc, code, user)
 
-        # enrolled_codes = users_collection.find({'username': user})[0]['enrolled']
+        # add the course to the user's enrolled courses
         user_info = users_collection.find_one({'username': user})
-        # print("User info: ", user_info)
         enrolled_codes = user_info.get('enrolled', [])  # Get the 'enrolled' field or an empty list if it doesn't exist
 
-        if code not in enrolled_codes:
+        if code not in enrolled_codes and user != course_doc['instructor']:
             enrolled_codes.append(code)
             users_collection.update_one({'username': user}, {'$set': {'enrolled': enrolled_codes}})
             # user_info =  users_collection.find_one({'username': user})
             # print("User info: ", user_info)
+
+            # Add the use to the course's enrolled students.
+            course_db = mongo_client[code]
+            stu_coll = course_db['students']
+            stu_coll.insert_one({
+                "username": user,
+                "scores": []
+            })
+
         return redirect(f"/course/{code}")
     else:
         error = "code does not exists"
@@ -272,7 +252,7 @@ def enter_course(code):
                                                      course=course,
                                                      is_instructor=is_instructor,
                                                      is_question_active=is_question_active))
-            response.set_cookie("course-code", code) # TODO: remove?
+            response.set_cookie("course-code", code)  # TODO: remove?
             return response
         return render_template("course.html", user=user, error=None, course=course)
 
@@ -289,6 +269,14 @@ def enter_course(code):
     return render_template("homepage.html")
 
 
+def get_average(scores):
+    total = 0
+    for i in scores:
+        total += i
+
+    return total / len(scores)
+
+
 @app.route('/gradebook/<code>')
 def gradebook(code):
     print("User is now in gradebook")
@@ -301,15 +289,27 @@ def gradebook(code):
     if code_match:
         course = code_match[0]
 
+        stu_dict = {}
+        for s in [i for i in mongo_client[course['code']]['students'].find({})]:
+            stu_dict.update({s['username']: str(round(round(get_average(s['scores']), 2) * 100)) + "%"})
+
+        print(stu_dict)
+
+        stu_scores = []
+        s = mongo_client[course['code']]['students'].find_one({"username": user})
+        if s is not None:
+            stu_scores = s['scores']
+
         is_instructor = course['instructor'] == request.cookies.get("user")
 
         if course in enrolled_courses(user) or course in created_courses(user):
+            return render_template('gradebook.html', code=code,
+                                   user=user,
+                                   course=course,
+                                   is_instructor=is_instructor,
+                                   stu_dict=stu_dict,
+                                   scores=stu_scores)
 
-            return render_template('gradebook.html', code = code,
-                                                    user = user,
-                                                    course=course,
-                                                    is_instructor=is_instructor)
-    
     return render_template("homepage.html")
 
 
@@ -331,7 +331,7 @@ def homepage():
         print("no user found")
         return redirect("/login")
     else:
-        print("user found and will render hompage.html")
+        print("user found and will render homepage.html")
     return render_template(
         "homepage.html", user=user, courses=[i for i in courses_collection.find()]
     )
@@ -366,33 +366,41 @@ def ws_join_room(course_code):
 def answer_question(course, user, answer):
     # Fired by students when they press the "Submit" button on an active question.
     # Save their answer to the course's "answers" collection.
-    # print(course, user, answer)
+    print(course, user, answer)
     mongo_client[course]['current-answers'].insert_one({
-        "user": user,
+        "username": user,
         "answer": answer
     })
 
 
-@app.route('/current-question')
-def get_current_question():
-    course_code = request.cookies.get('course-code')
-    course_db = mongo_client[course_code]
+@app.route('/current-question/<code>')
+def get_current_question(code):
+    # print(code)
 
-    active_question = course_db['questions'].find_one({'active': 'true'})
+    course_db = mongo_client[code]
 
     answer = ""
-    answer_doc = course_db['current-answers'].find_one({'user': request.cookies.get("user")})
+    answer_doc = course_db['current-answers'].find_one({'username': request.cookies.get("user")})
+    if answer_doc is not None:
+        answer = answer_doc['answer']
+
+    is_instructor = "false"
+    course = courses_collection.find_one({'code': code})
+    if course is not None and course['instructor'] == request.cookies.get("user"):
+        is_instructor = "true"
+
     if answer_doc is not None:
         answer = answer_doc['answer']
 
     q_dict = {}
+    active_question = course_db['questions'].find_one({'active': 'true'})
 
     if active_question:
         q_dict = {
             "answer": answer,
+            "is_instructor": is_instructor,
             "question": active_question['question'],
-            "answers": active_question['answers'],
-            "correct": active_question['correct']  # character a, b, c, or d
+            "answers": active_question['answers']
         }
 
     return json.dumps(q_dict), 200, {'ContentType': 'application/json'}
@@ -401,10 +409,7 @@ def get_current_question():
 # Instructors should have access to a question form which sends an HTTP multipart request
 @app.route('/post-question', methods=['POST'])
 def post_question():
-    answer = '0' if request.form.get('a1_rad') is not None else \
-        '1' if request.form.get('a2_rad') is not None else \
-        '2' if request.form.get('a3_rad') is not None else \
-        '3'
+    answer = request.form['cq_rad']
 
     course_dict = {
         "active": "true",
@@ -420,11 +425,8 @@ def post_question():
 
     json_str = json.dumps(course_dict)
 
-    # print(request.form)
-
     # Add the question to the "questions" collection, and reset the "answers" collection.
     course_code = request.form['course-code']
-    course_code = html.escape(course_code)
     course_db = mongo_client[course_code]
 
     questions_coll = course_db['questions']
@@ -444,13 +446,32 @@ def stop_question():
     # TODO: iterate through current answers collection, updating all students' grades.
 
     course_code = request.form['course-code']
-    course_code = html.escape(course_code)
-    q_coll = mongo_client[course_code]['questions']
+    course_db = mongo_client[course_code]
+    q_coll = course_db['questions']
 
-    if q_coll.find_one({'active': 'true'}):
-        q_coll.update_one({'active': 'true'}, {"$set": {'active': 'false'}})
+    question = q_coll.find_one({'active': 'true'})
+    q_coll.update_one({'active': 'true'}, {"$set": {'active': 'false'}})
+
+    if question is None:
+        return None  # This should never happen but who knows
 
     app_ws.emit('stop_question', to=course_code)
+
+    # iterate through all students
+    students = [i for i in course_db['students'].find({})]
+    correct = question['correct']
+
+    for s in students:
+        print(s['username'])
+        # if they have a recorded answer (current-answers), and the answer is correct, append a 1.
+        answer = course_db['current-answers'].find_one({"username": s['username']})
+        stu_scores = s['scores']
+        if answer is not None and answer['answer'] == correct:
+            print(s['username'], s['scores'], answer['answer'], correct)
+            stu_scores.append(1)
+        else:
+            stu_scores.append(0)
+        course_db['students'].update_one({'username': s['username']}, {"$set": {'scores': stu_scores}})
 
     return redirect("/course/" + course_code)
 

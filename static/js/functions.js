@@ -17,6 +17,7 @@ socket.on("new_question", (json) => {
     var choices = document.getElementsByName("q_choice");
     for (var i = 0; i < choices.length; i++) {
         choices[i].disabled = false;
+        choices[i].checked = false;
     }
 
     // console.log("Question: " + question['question'] + "Answer: " + question['correct'] + "Answers: " + question['answers'][0] + question['answers'][1])
@@ -47,7 +48,7 @@ function answerQuestion() {
             answer = choices[i].value;
         }
     }
-    console.log("Choices: " + document.getElementsByName("q_choice").length);
+    // console.log("Choices: " + document.getElementsByName("q_choice").length);
 
 
     socket.emit("answer_question", course_id, getCookie("user"), answer);
@@ -62,6 +63,13 @@ document.getElementById("q_button").addEventListener("click", answerQuestion);
 //}
 
 // document.getElementById("stop_question").addEventListener("click", stopQuestion);
+
+var radio_btns = document.getElementsByName("cq_rad");
+for (var i = 0; i < radio_btns.length; i++) {
+    radio_btns[i].addEventListener("change", function() {
+        document.getElementById("save-question").disabled = false;
+    });
+}
 
 function getQuestion() {
     // console.log(getCookie("user"));
@@ -85,7 +93,7 @@ function getQuestion() {
                     var choices = document.getElementsByName("q_choice");
                     for (var i = 0; i < choices.length; i++) {
                         choices[i].disabled = true;
-                        if (responseJSON['answers'][0] == responseJSON['answer']) {
+                        if (responseJSON['answer'] == choices[i].value) {
                             choices[i].checked = true;
                         }
                     }
@@ -95,7 +103,7 @@ function getQuestion() {
             }
         }
     };
-    request.open("GET", "/current-question");
+    request.open("GET", "/current-question/" + course_id);
     request.send();
 }
 

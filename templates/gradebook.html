@@ -33,7 +33,7 @@
     </style>
 
     <main>
-        {% if is_instructor == false%}
+        {% if is_instructor == false %}
             <div class="student-view">
                 <nav class="second-nav">
                     <!--<input type="text" placeholder="Find a Student" name="search">
@@ -46,19 +46,19 @@
                 </nav>
                 <table>
                     <tr>
-                        <th>Title</th>
-                        <th>Answer</th>
-                        <th>Total Points</th>
+                        <th>Question</th>
+                        <th>Score</th>
                     </tr>
+                    {% for s in scores %}
                     <tr>
-                        <td>{{question}}Did you like CSE 312?</td>
-                        <td>{{answer}}Yes</td>
-                        <td>{{grade}}1 point</td>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ s }}</td>
                     </tr>
+                    {% endfor %}
                 </table>
             </div>
         {% endif %}
-        {% if is_instructor == true%}
+        {% if is_instructor == true %}
             <div class="instructor-view">
                 <nav class="second-nav">
                     <!--<input type="text" placeholder="Find a Student" name="search">
@@ -74,14 +74,12 @@
                         <th>Students</th>
                         <th>Grade</th>
                     </tr>
+                    {% for stu in stu_dict %}
                     <tr>
-                        <td>{{student_name}}Student name 1</td>
-                        <td>{{student_grade}}90%</td>
+                        <td>{{ stu }}</td>
+                        <td>{{ stu_dict[stu] }}</td>
                     </tr>
-                    <tr>
-                        <td>Student name 2</td>
-                        <td>100%</td>
-                    </tr>
+                    {% endfor %}
                 </table>
             </div>
         {% endif %}
