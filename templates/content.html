@@ -3,13 +3,19 @@
         <title>Course</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/content.css') }}">
         <link rel="stylesheet" href="../static/css/content.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
 
     <nav class="nav-bar">
         <p>{{course['title']}}</p>
         <a id="content" href="/course/{{course['code']}}">CONTENT</a>
         <a id="gradebook" href="/gradebook/{{course['code']}}">GRADEBOOK</a>
-        <a id="students" href="#">STUDENTS</a>
+        <!--<a id="students" href="#">STUDENTS</a>-->
+
+        <a class="logout" href="/logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Log Out</span>
+        </a>
     </nav>
 
     <main class="main">
@@ -79,16 +85,26 @@
 
             <form id="question_form" style="visibility: hidden;">
                 <p id="q_question"></p>
-                <input type="radio" name="q_choice" value="1">
-                <label id="q_a1"></label><br>
-                <input type="radio" name="q_choice" value="2">
-                <label id="q_a2"></label><br>
-                <input type="radio" name="q_choice" value="3">
-                <label id="q_a3"></label><br>
-                <input type="radio" name="q_choice" value="4">
-                <label id="q_a4"></label><br>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a1">
+                    <label id="q_a1"></label>a1<br>
+                </div>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a2">
+                    <label id="q_a2"></label>a2<br>
+                </div>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a3">
+                    <label id="q_a3"></label>a3<br>
+                </div>
+                <div id="answer_question">
+                    <input type="radio" name="q_choice" value="a4">
+                    <label id="q_a4"></label>a4<br>
+                </div>
 
-                <button type="button" id="q_button">Submit</button>
+                <div id="q_button_container">
+                    <button type="button" id="q_button"><i class="fa fa-paper-plane-o"></i>Submit</button>
+                </div>
             </form>
 
             {% if is_question_active == true and is_instructor == true %}

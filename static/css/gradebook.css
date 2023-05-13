@@ -100,12 +100,21 @@ main button {
   main button:hover {
     background: lightgray;
   }
+
+  .second-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .student-info{
+    text-align: center;
+  }
   
   #class-average{
-    margin-left: 380px;
+    align-items: center;
   }
   #based-on{
-    margin-left: 370px;
     font-size: small;
   }
 
@@ -116,3 +125,12 @@ main button {
   #student-name{
     text-align: center;
   }
+.logout{
+  float: right;
+  color: white;
+  text-decoration: none;
+}
+
+.logout:hover{
+  background-color: #2167d8;
+}

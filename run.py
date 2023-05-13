@@ -307,7 +307,8 @@ def gradebook(code):
 
             return render_template('gradebook.html', code = code,
                                                     user = user,
-                                                    course=course)
+                                                    course=course,
+                                                    is_instructor=is_instructor)
     
     return render_template("homepage.html")
 

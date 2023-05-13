@@ -1,25 +1,89 @@
 <html>
     <head>
         <title>Gradebook</title>
+        <link rel="stylesheet" href="/static/css/gradebook.css"/>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/gradebook.css') }}"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
-
     <nav class="nav-bar">
         <p>{{course['title']}}</p>
         <a id="content" href="/course/{{course['code']}}">CONTENT</a>
         <a id="gradebook" href="/gradebook/{{course['code']}}">GRADEBOOK</a>
-        <a id="students" href="#">STUDENTS</a>
+        <!--<a id="students" href="#">STUDENTS</a>-->
+
+        <a class="logout" href="/logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Log Out</span>
+        </a>
+
     </nav>
 
+    <style>
+        table, th, td {
+            border: solid #e7e9ec;
+            border-collapse: collapse;
+            background-color: rgb(249, 249, 249);
+            }
+        table{
+            width: 100%;
+        }
+        th,td{
+            justify-content: space-between;
+        }
+    </style>
+
     <main>
-        <nav class="second-nav">
-            <input type="text" placeholder="Find a Student" name="search">
-            <button type="submit"><i class="fa fa-search"></i></button>
-            <label id="class-average">Class Average: 2/4</label>
-            <br>
-            <label id="based-on">Based on 4/4 <span>graded items</span></label>
-        </nav>
-        <p id="student-name">Student 1: <span id="student-grade"></span>90</p>
-        <p id="student-name">Student 2: <span id="student-grade"></span>80</p>
+        {% if is_instructor == false%}
+            <div class="student-view">
+                <nav class="second-nav">
+                    <!--<input type="text" placeholder="Find a Student" name="search">
+                    <button type="submit"><i class="fa fa-search"></i></button>-->
+                    <div class="student-info">
+                        <label id="class-average">Your Average: 2/4</label>
+                        <br>
+                        <label id="based-on">Based on 4/4 <span>graded items</span></label>
+                    </div>
+                </nav>
+                <table>
+                    <tr>
+                        <th>Title</th>
+                        <th>Answer</th>
+                        <th>Total Points</th>
+                    </tr>
+                    <tr>
+                        <td>{{question}}Did you like CSE 312?</td>
+                        <td>{{answer}}Yes</td>
+                        <td>{{grade}}1 point</td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+        {% if is_instructor == true%}
+            <div class="instructor-view">
+                <nav class="second-nav">
+                    <!--<input type="text" placeholder="Find a Student" name="search">
+                    <button type="submit"><i class="fa fa-search"></i></button>-->
+                    <div class="student-info">
+                        <label id="class-average">Class Average: 2/4</label>
+                        <br>
+                        <label id="based-on">Based on 4/4 <span>graded items</span></label>
+                    </div>
+                </nav>
+                <table>
+                    <tr>
+                        <th>Students</th>
+                        <th>Grade</th>
+                    </tr>
+                    <tr>
+                        <td>{{student_name}}Student name 1</td>
+                        <td>{{student_grade}}90%</td>
+                    </tr>
+                    <tr>
+                        <td>Student name 2</td>
+                        <td>100%</td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+
     </main>
