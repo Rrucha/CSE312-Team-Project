@@ -35,24 +35,41 @@
 
         <form action="/post-question" method="post" enctype="multipart/form-data" id="create-question" class="create-question" style="display: none;">
             <h4>Create Multiple Choice Questions</h4>
-            <div id="question_container1">
-                <div id="question_container2">
-                    <input name="course-code" value="{{ course['code'] }}" hidden>
-                    <p1>Question Details</p1><br><br>
-                    <label for="question">Question:</label><br>
-                    <input type="text" name="question" id="question" placeholder="Write your question here...">
-                    <br><br>
-                    <label for="correct-answer">Correct Answer:</label><br>
-                    <input type="text" name="correct-answer" id="correct-answer" placeholder="Write a response...">
-                    <br><br><label for="incorrect-answers">Incorrect Answers:</label><br>
-                    <label id="incorrect-answers"></label>
-                    <input type="text" name="a1" class="incorrect-answer" placeholder="Write a response..."><br><br>
-                    <input type="text" name="a2" class="incorrect-answer" placeholder="Write a response..."><br><br>
-                    <input type="text" name="a3" class="incorrect-answer" placeholder="Write a response..."><br><br>
-                    <input type="text" name="a4" class="incorrect-answer" placeholder="Write a response..."><br><br>
-                    <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
-                    <button id="save-question" type="submit">Save</button>
-                </div>  
+<!--            <div>-->
+<!--                <input name="course-code" value="{{ course['code'] }}" hidden>-->
+<!--                <p1>Question Details</p1><br><br>-->
+<!--                <label for="question">Question:</label>-->
+<!--                <input type="text" name="question" id="question">-->
+<!--                <br><br>-->
+<!--                <label for="correct-answer">Correct Answer:</label>-->
+<!--                <input type="text" name="correct-answer" id="correct-answer">-->
+<!--                <br><br><label for="incorrect-answers">Incorrect Answers:</label><br>-->
+<!--                <label id="incorrect-answers">A</label>-->
+<!--                <input type="text" name="a1" class="incorrect-answer"><br><br>-->
+<!--                <input type="text" name="a2" class="incorrect-answer"><br><br>-->
+<!--                <input type="text" name="a3" class="incorrect-answer"><br><br>-->
+<!--                <input type="text" name="a4" class="incorrect-answer"><br><br>-->
+<!--                <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>-->
+<!--                <button id="save-question" type="submit">Save</button>-->
+<!--            </div>-->
+
+            <div>
+                <input name="course-code" value="{{ course['code'] }}" hidden>
+                <p1>Question Details</p1><br><br>
+                <label for="question">Question:</label>
+                <input type="text" name="question" id="question">
+                <br><br>
+                <label id="choice_header">Choices:</label><br>
+                <input type="radio" name="a1_rad">
+                    <input type="text" name="a1" class="cq_choice"><br>
+                <input type="radio" name="a2_rad">
+                    <input type="text" name="a2" class="cq_choice"><br>
+                <input type="radio" name="a3_rad">
+                    <input type="text" name="a3" class="cq_choice"><br>
+                <input type="radio" name="a4_rad">
+                    <input type="text" name="a4" class="cq_choice"><br><br>
+                <button id="cancel-question" onclick="cancelQuestion()">Cancel</button>
+                <button id="save-question" type="submit">Save</button>
             </div>
 
         </form>
@@ -84,7 +101,7 @@
                     <input type="radio" name="q_choice" value="a4">
                     <label id="q_a4"></label>a4<br>
                 </div>
-                
+
                 <div id="q_button_container">
                     <button type="button" id="q_button"><i class="fa fa-paper-plane-o"></i>Submit</button>
                 </div>
