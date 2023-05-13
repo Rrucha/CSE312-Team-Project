@@ -5,7 +5,11 @@ WORKDIR /root
 
 COPY . .
 
-RUN pip install -r requirements.txt
+RUN pip install pymongo
+RUN pip install Flask
+RUN pip install Flask_SocketIO
+RUN pip install gevent-websocket
+RUN pip install bcrypt
 
 EXPOSE 8000
 
