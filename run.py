@@ -1,4 +1,3 @@
-from turtle import tilt, title
 import uuid
 from ast import Pass
 import json
@@ -18,9 +17,9 @@ app_ws = SocketIO(app)
 MONGO_HOST = "mongo"
 MONGO_PORT = 27017
 mongo_client = MongoClient(MONGO_HOST, MONGO_PORT)
-db = mongo_client["TOPHAT_SITEDATA"]
-users_collection = db["users"]
-courses_collection = db["courses"]
+site_db = mongo_client["TOPHAT_SITEDATA"]
+users_collection = site_db["users"]
+courses_collection = site_db["courses"]
 
 
 def enrolled_courses(user):
@@ -289,6 +288,7 @@ def enter_course(code):
     # return redirect(f"/course/{code}")
     return render_template("homepage.html")
 
+
 @app.route('/gradebook/<code>')
 def gradebook(code):
     print("User is now in gradebook")
@@ -310,6 +310,7 @@ def gradebook(code):
                                                     course=course)
     
     return render_template("homepage.html")
+
 
 @app.route('/courseslist', methods=["GET"])
 def courseslist():
@@ -378,10 +379,16 @@ def get_current_question():
 
     active_question = course_db['questions'].find_one({'active': 'true'})
 
+    answer = ""
+    answer_doc = course_db['current-answers'].find_one({'user': request.cookies.get("user")})
+    if answer_doc is not None:
+        answer = answer_doc['answer']
+
     q_dict = {}
 
     if active_question:
         q_dict = {
+            "answer": answer,
             "question": active_question['question'],
             "answers": active_question['answers'],
             "correct": active_question['correct']  # character a, b, c, or d
@@ -393,28 +400,21 @@ def get_current_question():
 # Instructors should have access to a question form which sends an HTTP multipart request
 @app.route('/post-question', methods=['POST'])
 def post_question():
-    question = request.form['question']
-    question = html.escape(question)
-    correcr_ans = request.form['correct-answer']
-    correcr_ans = html.escape(correcr_ans)
-    A1 =  request.form['a1']
-    A1 = html.escape(A1)
-    A2 =  request.form['a2']
-    A2 = html.escape(A2)
-    A3 =  request.form['a3']
-    A3 = html.escape(A3)
-    A4 =  request.form['a4']
-    A4 = html.escape(A4)
+    answer = '0' if request.form.get('a1_rad') is not None else \
+        '1' if request.form.get('a2_rad') is not None else \
+        '2' if request.form.get('a3_rad') is not None else \
+        '3'
+
     course_dict = {
         "active": "true",
-        "question": question,
+        "question": html.escape(request.form['question']),
         "answers": [
-            A1,
-            A2,
-            A3,
-            A4
+            html.escape(request.form['a1']),
+            html.escape(request.form['a2']),
+            html.escape(request.form['a3']),
+            html.escape(request.form['a4'])
         ],
-        "correct": correcr_ans  # character a, b, c, or d
+        "correct": answer  # character 0, 1, 2, or 3
     }
 
     json_str = json.dumps(course_dict)
@@ -455,4 +455,10 @@ def stop_question():
 
 
 if __name__ == "__main__":
+    # Before startup, delete all questions that were active before the "crash" (server shutdown)
+    courses = [i for i in courses_collection.find({})]
+    for c in courses:
+        c_db = mongo_client[c['code']]['questions']
+        c_db.delete_many({'active': 'true'})
+
     app_ws.run(app, host='0.0.0.0', port=8000)

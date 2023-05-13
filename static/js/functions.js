@@ -74,16 +74,24 @@ function getQuestion() {
             if (this.responseText != "{}") {
                 const responseJSON = JSON.parse(this.responseText)
 
-                // document.getElementById("question_form").disabled = false
-                document.getElementById("question_form").style.visibility = 'visible'
                 document.getElementById("q_question").innerHTML = responseJSON['question']
                 document.getElementById("q_a1").innerHTML = responseJSON['answers'][0]
                 document.getElementById("q_a2").innerHTML = responseJSON['answers'][1]
                 document.getElementById("q_a3").innerHTML = responseJSON['answers'][2]
                 document.getElementById("q_a4").innerHTML = responseJSON['answers'][3]
 
-                // TODO: add extra checks to see if the question was already answered or is no longer active.
-                // If so, disable all fields.
+                // If already answered, disable all fields.
+                if (responseJSON['answer'] != "") {
+                    var choices = document.getElementsByName("q_choice");
+                    for (var i = 0; i < choices.length; i++) {
+                        choices[i].disabled = true;
+                        if (responseJSON['answers'][0] == responseJSON['answer']) {
+                            choices[i].checked = true;
+                        }
+                    }
+                }
+
+                document.getElementById("question_form").style.visibility = 'visible'
             }
         }
     };
